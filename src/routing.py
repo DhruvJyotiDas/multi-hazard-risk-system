@@ -56,6 +56,7 @@ class RoutingResult:
     hospitals: gpd.GeoDataFrame
     shelters: gpd.GeoDataFrame
     roads: gpd.GeoDataFrame
+    graph: nx.MultiDiGraph | None = None   # annotated (length, risk) graph, embedded compactly in the web map
 
 
 # --------------------------------------------------------------------------- #
@@ -403,4 +404,4 @@ def run_routing(G: nx.MultiDiGraph, stack: RasterStack, study_area: BaseGeometry
     log.info("Routing done: %d routes (%d pairs) saved to %s and %s", len(routes), len(metrics),
              config.ROUTES_GEOJSON.name, config.ROUTE_METRICS_CSV.name)
     return RoutingResult(routes=routes, metrics=metrics, origins=origins, hospitals=pois["hospital"],
-                         shelters=pois["shelter"], roads=display_roads(G))
+                         shelters=pois["shelter"], roads=display_roads(G), graph=G)

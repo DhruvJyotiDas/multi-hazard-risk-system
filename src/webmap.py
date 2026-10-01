@@ -24,6 +24,7 @@ import io
 import json
 import logging
 import sys
+from pathlib import Path
 
 import folium
 import geopandas as gpd
@@ -34,6 +35,7 @@ from PIL import Image
 import config
 from src.rasters import RasterStack
 from src.routing import RoutingResult
+from src.webdata import build_webgraph, facilities_payload
 
 log = logging.getLogger(__name__)
 
@@ -211,6 +213,32 @@ html,body{height:100%;margin:0;font-family:'Segoe UI',Roboto,Helvetica,Arial,san
 .pp{font-size:12.5px;line-height:1.45}.pp b{font-size:13px}
 .pp table{border-collapse:collapse;margin-top:4px}.pp td{padding:1px 8px 1px 0}
 small{color:#52606d}
+.srch{position:fixed;top:64px;left:64px;width:350px;max-width:calc(100vw - 90px);background:#fff;z-index:1090;border-radius:8px;
+ box-shadow:0 2px 12px rgba(0,0,0,.35);padding:9px 10px;font-size:12.5px}
+.srch-row{display:flex;gap:5px;align-items:center;margin-bottom:5px;position:relative}
+.srch-row input{flex:1;min-width:0;border:1px solid #c5ccd3;border-radius:5px;padding:6px 8px;font-size:12.5px}
+.srch-row button,.srch-opts button{border:1px solid #c5ccd3;background:#f4f6f8;border-radius:5px;padding:5px 8px;cursor:pointer;font-size:12px}
+.srch-opts button#srch-go{background:#0f2a43;color:#fff;border-color:#0f2a43;font-weight:600}
+.srch-opts{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:11.5px;color:#334}
+.srch-opts select{font-size:11.5px;padding:2px;border:1px solid #c5ccd3;border-radius:4px}
+.dotl{display:inline-block;width:20px;height:20px;border-radius:50%;color:#fff;font-weight:700;font-size:11px;text-align:center;line-height:20px;flex:none}
+.sug{display:none;position:absolute;left:25px;right:0;top:100%;background:#fff;border:1px solid #c5ccd3;border-radius:5px;z-index:1200;
+ max-height:230px;overflow-y:auto;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.sug div{padding:5px 8px;cursor:pointer;border-bottom:1px solid #eef0f2}.sug div:hover{background:#eaf2fb}.sug small{margin-left:6px}
+#srch-msg{font-size:11.5px;color:#b3261e;margin-top:4px}
+#srch-summary{display:none;margin-top:6px;padding:6px 8px;background:#f1f6f2;border-left:3px solid #1a9850;font-size:12px;line-height:1.5}
+.good{color:#067d34;font-weight:600}
+.pin{width:26px;height:26px;border-radius:50%;color:#fff;font-weight:700;text-align:center;line-height:26px;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)}
+.switch2{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;margin:4px 0 8px;cursor:pointer}
+.switch2 input{width:34px;height:18px;accent-color:#0f2a43}
+#fac-body.off{opacity:.45;pointer-events:none}
+.fcat{display:flex;align-items:center;gap:6px;padding:2px 0;font-size:12.5px;cursor:pointer}
+.fcat small{margin-left:auto}
+.fbtns{display:flex;gap:6px;margin:6px 0}.fbtns button{border:1px solid #c5ccd3;background:#f4f6f8;border-radius:5px;padding:3px 8px;font-size:11.5px;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 8px}.chip{background:#eef2f6;border-radius:10px;padding:2px 8px;font-size:11px}
+.rlist{max-height:340px;overflow-y:auto;border-top:1px solid #e4e7eb}
+.ritem{padding:5px 2px;border-bottom:1px solid #eef0f2;cursor:pointer;font-size:12px;display:grid;grid-template-columns:48px 14px 1fr;column-gap:4px}
+.ritem:hover{background:#f1f6fb}.ritem .km{color:#52606d;text-align:right}.ritem small{grid-column:3}
 """
 
 JS = r"""
@@ -255,6 +283,7 @@ JS = r"""
   var NAMES = DATA.class_names, COLORS = DATA.class_colors;
   function val(name, idx){ var v = grids[name][idx]; return v === 255 ? null : v/254; }
   map.on('click', function(e){
+    if (window.__pickMode) return;
     var w=B[0], s=B[1], ea=B[2], n=B[3];
     if (e.latlng.lng < w || e.latlng.lng > ea || e.latlng.lat < s || e.latlng.lat > n) return;
     var c = Math.floor((e.latlng.lng - w)/(ea - w)*COLS), r = Math.floor((n - e.latlng.lat)/(n - s)*ROWS);
@@ -284,6 +313,43 @@ class _PanelScript(MacroElement):
         self.js = js
 
 
+def _json(obj) -> str:
+    """Compact JSON safe to embed inside a <script> block."""
+    return json.dumps(obj, separators=(",", ":")).replace("</", "<\\/")
+
+
+def search_box_html() -> str:
+    corridor = "".join(f"<option value='{k}'{' selected' if k == config.SEARCH_CORRIDOR_DEFAULT_KM else ''}>{k} km</option>"
+                       for k in config.SEARCH_CORRIDOR_KM)
+    return f"""<div class="srch" id="srch">
+ <div class="srch-row"><span class="dotl" style="background:#2e7d32">A</span><input id="srch-from" autocomplete="off"
+   placeholder="From: place, facility or lat, lon"><button id="pick-from" title="Pick on the map">&#8982;</button><div class="sug" id="sug-from"></div></div>
+ <div class="srch-row"><span class="dotl" style="background:#c62828">B</span><input id="srch-to" autocomplete="off"
+   placeholder="To: place, facility or lat, lon"><button id="pick-to" title="Pick on the map">&#8982;</button><button id="srch-swap" title="Swap A and B">&#8645;</button><div class="sug" id="sug-to"></div></div>
+ <div class="srch-opts">Find places within <select id="srch-corr">{corridor}</select> of the
+   <select id="srch-mode"><option value="safe">least-risk route</option><option value="short">shortest route</option></select>
+   <button id="srch-go">Search</button><button id="srch-clear">Clear</button></div>
+ <div id="srch-msg"></div><div id="srch-summary"></div>
+</div>"""
+
+
+def facilities_panel_html(payload: dict | None, has_roads: bool) -> str:
+    """Right-panel section with the master toggle for all facilities and roads, plus per-category switches."""
+    if not payload and not has_roads:
+        return ""
+    rows = "".join(
+        f"<label class='fcat'><input type='checkbox' class='fac-cat' data-i='{i}' checked>"
+        f"<span class='sw' style='background:{c['color']}'></span>{c['label']}<small>{c['count']}</small></label>"
+        for i, c in enumerate((payload or {}).get("cats", [])))
+    roads = ("<label class='fcat'><input type='checkbox' id='fac-roads' checked>"
+             "<span class='sw' style='background:#7a2e0e'></span>All roads (major / minor / local)</label>") if has_roads else             "<input type='checkbox' id='fac-roads' hidden>"
+    return f"""<details open><summary>Facilities &amp; roads (details)</summary>
+  <label class="switch2"><input type="checkbox" id="fac-master"> Show all facilities, important places &amp; roads</label>
+  <div id="fac-body" class="off">{roads}<div class="fbtns"><button id="fac-all">All categories</button><button id="fac-none">None</button></div>{rows}</div>
+  <p class="note">Toggle the whole detail layer on or off. Click a marker for its name and category. Data: OpenStreetMap.</p></details>"""
+
+
+
 # --------------------------------------------------------------------------- #
 # Map assembly
 # --------------------------------------------------------------------------- #
@@ -300,7 +366,8 @@ def _marker(lat: float, lon: float, name: str, popup: str, color: str, icon: str
 
 
 def build_map(stack: RasterStack, summary: dict, routing: RoutingResult, hotspots: gpd.GeoDataFrame,
-              out_path=config.INDEX_HTML, live_layers: dict | None = None) -> folium.Map:
+              out_path=config.INDEX_HTML, live_layers: dict | None = None,
+              facilities: list | None = None) -> folium.Map:
     """Assemble and write the standalone interactive map; returns the folium.Map.
 
     ``live_layers`` ({label: ee.Image}) optionally adds live Earth Engine tile layers
@@ -425,11 +492,24 @@ def build_map(stack: RasterStack, summary: dict, routing: RoutingResult, hotspot
                f"<b>{hs_sum.get('total_area_km2', 0)}</b> km&sup2; ({hs_sum.get('percent_of_study_area', 0)}% of the study area); "
                f"<b>{hs_sum.get('built_area_km2', 0)}</b> km&sup2; of built-up land lies inside them.</p>")
 
+    fac_payload = facilities_payload(facilities) if facilities else None
+    webgraph = None
+    if getattr(routing, "graph", None) is not None:
+        try:
+            webgraph = build_webgraph(routing.graph)
+        except Exception as err:  # noqa: BLE001 - the map still works without in-browser routing
+            log.warning("Could not build the in-browser road graph (%s); search falls back to a straight corridor", err)
+    search_box = search_box_html()
+    facilities_panel = facilities_panel_html(fac_payload, webgraph is not None)
+
     panel = f"""
 <div id="hdr"><h1>{config.MAP_TITLE}</h1>
  <span class="sub">Satellite data &rarr; indicator / model &rarr; recommendation</span></div>
 <button id="ptoggle" title="Show / hide panel">&#9654;</button>
+{search_box}
 <div id="panel">
+ {facilities_panel}
+ <details open id="route-det"><summary>Route &amp; nearby facilities</summary><div id="route-results"><p class="note">Search two places (top-left box) to list the facilities and important places between them, along the shortest and least-risk road routes.</p></div></details>
  <details open><summary>Layers &amp; opacity</summary><div id="layer-rows"></div>
    <p class="note">Click anywhere on the map for the risk class and index at that pixel. Basemaps: top-left control.</p></details>
  <details open><summary>Legend</summary>{legend_html(summary.get('breaks', []))}</details>
@@ -446,8 +526,14 @@ def build_map(stack: RasterStack, summary: dict, routing: RoutingResult, hotspot
 </div>"""
     m.get_root().header.add_child(Element(f"<style>{CSS}</style>"))
     m.get_root().html.add_child(Element(panel))
+    search_cfg = {"alpha": config.ROUTE_ALPHA, "snapMaxM": config.WEBGRAPH_SNAP_MAX_M,
+                  "shortest": config.ROUTE_SHORTEST_STYLE, "safe": config.ROUTE_LEASTRISK_STYLE,
+                  "roadColors": config.ROAD_CLASS_COLORS}
+    search_js = (Path(__file__).parent / "static" / "search.js").read_text(encoding="utf-8")
     js = (f"var MAP_NAME = {json.dumps(m.get_name())};\nvar RASTER_DATA = {json.dumps(raster_data)};\n"
-          f"var LAYERS = {json.dumps(layers_meta)};\n{JS}")
+          f"var LAYERS = {json.dumps(layers_meta)};\n{JS}\n"
+          f"var FACILITY_DATA = {_json(fac_payload)};\nvar WEBGRAPH = {_json(webgraph)};\n"
+          f"var SEARCH_CONFIG = {_json(search_cfg)};\n{search_js}")
     m.add_child(_PanelScript(js))
 
     out_path.parent.mkdir(parents=True, exist_ok=True)

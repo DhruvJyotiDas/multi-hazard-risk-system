@@ -1,16 +1,93 @@
-# Multi-Hazard Risk & Emergency Routing — Wayanad District, Kerala
+<div align="center">
 
-A Google Earth Engine (GEE) decision-support system that turns satellite data into **flood, landslide, fire and
-exposure** layers, fuses them with an **AHP + entropy** multi-criteria model into a composite risk index, extracts
-high-risk **hotspots**, and computes **least-risk** (not merely shortest) **emergency routes** from the riskiest
-settlements to the nearest major hospital and shelter. Everything is delivered as a standalone interactive web map.
+<h1>🌍 Wayanad Risk Observatory</h1>
 
-```
-Satellite Data           →   Indicator / Model                →   Recommendation
-Sentinel-1 / Sentinel-2      flood · landslide · fire ·           hotspot polygons +
-SRTM · CHIRPS · JRC          exposure  →  AHP + entropy           least-risk routes to
-MODIS/VIIRS · Dynamic World  →  composite risk index (0–1)        hospitals and shelters
-```
+<h3>Multi-Hazard Risk Mapping &amp; Emergency Routing</h3>
+
+<p><strong>Observe the landscape. Understand the risk. Find a safer route.</strong></p>
+
+<p>Satellite-powered geospatial decision support for Wayanad District, Kerala, India.</p>
+
+<p>
+  <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11 and above">
+  <img src="https://img.shields.io/badge/Google-Earth_Engine-4285F4?style=for-the-badge&logo=googleearth&logoColor=white" alt="Google Earth Engine">
+  <img src="https://img.shields.io/badge/Risk_Model-AHP_%2B_Entropy-178A68?style=for-the-badge" alt="AHP plus entropy risk model">
+  <img src="https://img.shields.io/badge/Routing-Dual_Dijkstra-E99A45?style=for-the-badge" alt="Dual Dijkstra routing">
+</p>
+
+<p>
+  <a href="#project-at-a-glance">Project</a> &nbsp;·&nbsp;
+  <a href="#visual-tour">Visual tour</a> &nbsp;·&nbsp;
+  <a href="#run-it-on-localhost">Launch the map</a> &nbsp;·&nbsp;
+  <a href="#results-of-the-reference-run">Results</a> &nbsp;·&nbsp;
+  <a href="#setup-and-running-the-pipeline">Get started</a>
+</p>
+
+<img src="hackathon_gifs/gifs/01_workflow.gif" alt="Animated banner showing the six-stage workflow from satellite data to geospatial analysis, modelling, mapping and emergency recommendations" width="960">
+
+<p><sub><strong>Satellite data → Indicator / Model → Recommendation</strong></sub></p>
+
+</div>
+
+---
+
+## Project at a glance
+
+Wayanad Risk Observatory brings **hazard mapping, exposure analysis and emergency routing** into one geospatial
+workflow. It uses Google Earth Engine to analyse satellite observations, combines flood, landslide, fire and
+exposure layers with **AHP + entropy weighting**, identifies high-risk hotspots, and compares the **shortest** road
+route with the **least-risk** route to a hospital or shelter.
+
+The output is a **standalone interactive analysis map**, accompanied by a **3D terrain viewer** and reusable
+GeoTIFF, GeoJSON and CSV artifacts. The project connects scientific analysis to practical questions: where is risk
+concentrated, which settlements are exposed, and when does a longer route reduce hazard exposure?
+
+| 🛰️ Observe | 🧮 Understand | 🗺️ Explore | 🚑 Respond |
+|:---|:---|:---|:---|
+| Sentinel-1/2, SRTM, CHIRPS, JRC, MODIS/VIIRS and Dynamic World | Normalised hazard layers, AHP consistency, entropy weighting and CRITIC comparison | Risk classes, hotspots, terrain, layer controls and point inspection | Five settlement origins, hospital/shelter destinations and dual-route comparisons |
+
+<table>
+<tr>
+  <td align="center" width="25%"><strong>4</strong><br><sub>Hazard &amp; exposure dimensions</sub></td>
+  <td align="center" width="25%"><strong>2,143 km²</strong><br><sub>Wayanad study-area polygon</sub></td>
+  <td align="center" width="25%"><strong>351</strong><br><sub>Extracted hotspot polygons</sub></td>
+  <td align="center" width="25%"><strong>10</strong><br><sub>Origin–destination comparisons</sub></td>
+</tr>
+</table>
+
+*Area, hotspot and route counts above describe the saved project outputs; they are not live monitoring metrics.*
+
+## Visual tour
+
+The supplied animations explain the system from first observation to final recommendation. **Their maps and
+example numbers are illustrative synthetic demonstrations, not screenshots or measurements of the Wayanad run.**
+The [reference results](#results-of-the-reference-run) below report the saved analysis separately.
+
+<table>
+<tr>
+  <td width="50%" align="center"><strong>Interactive map walkthrough</strong></td>
+  <td width="50%" align="center"><strong>Feature atlas</strong></td>
+</tr>
+<tr>
+  <td><a href="hackathon_gifs/gifs/04_dry_run_web_map.gif"><img src="hackathon_gifs/gifs/04_dry_run_web_map.gif" alt="Illustrative web-map walkthrough with layer toggles, risk statistics and route comparisons" width="480"></a></td>
+  <td><a href="hackathon_gifs/gifs/05_feature_atlas.gif"><img src="hackathon_gifs/gifs/05_feature_atlas.gif" alt="Animated atlas of the project's geospatial analysis and map features" width="480"></a></td>
+</tr>
+<tr>
+  <td align="center"><sub>Layers, hotspots, points of interest and route comparison.</sub></td>
+  <td align="center"><sub>A visual guide to the capabilities of the decision-support system.</sub></td>
+</tr>
+</table>
+
+<details>
+<summary><strong>▶ Watch the full hazard-to-decision story</strong></summary>
+
+<p align="center">
+  <img src="hackathon_gifs/gifs/03e_hazards_to_decisions.gif" alt="Animation connecting hazard layers and exposure to hotspots and emergency decisions" width="960">
+</p>
+
+</details>
+
+---
 
 ## Which `index.html` is which?
 
@@ -21,9 +98,12 @@ There are two web pages in this repository. They are different things:
 | **[`index.html`](index.html)** (project root, ~26 MB) | **The pipeline's deliverable.** The Folium/Leaflet map generated by `python -m src.webmap`: all rasters, hotspots, roads, hospitals, shelters, both route types, click-anywhere popups, legend, statistics and route-comparison tables. Built from real analysis output. | `http://localhost:8000/index.html` (see [Run it on localhost](#run-it-on-localhost)) |
 | **[`frontend/index.html`](frontend/index.html)** | A separate **3D "Wayanad Risk Observatory" viewer** (orbitable terrain with real SRTM relief and Sentinel-2 imagery, the saved risk grids, hotspots, real routes and statistics). It reads the pipeline's saved outputs; it does not replace the root map. See [3D frontend](#3d-frontend). | `http://localhost:8000/frontend/index.html` |
 
-If you want the real analysis, open the **root `index.html`**.
+For the full analysis layers and tables, start with **root `index.html`**. For terrain exploration and focused route
+comparisons, open **`frontend/index.html`**.
 
 ## Contents
+
+* [Project at a glance](#project-at-a-glance) · [Visual tour](#visual-tour)
 
 1. [Run it on localhost](#run-it-on-localhost)
 2. [Results of the reference run](#results-of-the-reference-run)
@@ -70,7 +150,12 @@ Stop the server with `Ctrl+C`. Notes:
 
 ## Results of the reference run
 
-Wayanad, run on 1 October 2026 against the live Earth Engine catalog (project `rainfall-tank-analysis`).
+Saved Wayanad analysis from 1 October 2026. `run8.log` records a completed pipeline; the routing table below reflects
+the current saved route outputs, which supersede the earlier destinations and metrics printed in that log.
+
+> **A concrete route trade-off:** Panamaram → District Hospital Mananthavady reduces mean modelled risk by
+> **18.44%** for **5.37%** more distance. The verified 2024 landslide zone passes the model check, with
+> **68.11%** of zone pixels classified High or Very High.
 
 | Item | Result |
 |---|---|
@@ -160,6 +245,17 @@ Full metrics (including max risk per route): `outputs/route_metrics.csv`.
 ## Why Wayanad
 
 Wayanad is a high-relief Western Ghats plateau and one of India's most multi-hazard-dense districts.
+
+<table>
+<tr>
+  <td width="50%" align="center"><strong>Seasonal hazard context</strong></td>
+  <td width="50%" align="center"><strong>Why radar matters in the monsoon</strong></td>
+</tr>
+<tr>
+  <td><img src="hackathon_gifs/gifs/07a_hazard_seasons.gif" alt="Illustrative seasonal timeline of monsoon flood and landslide hazards and dry-season forest fires" width="480"></td>
+  <td><img src="hackathon_gifs/gifs/07b_sar_vs_optical.gif" alt="Animation comparing cloud-obscured optical imagery with synthetic aperture radar for flood observation" width="480"></td>
+</tr>
+</table>
 
 | Hazard | Context | Layer |
 |---|---|---|
@@ -253,11 +349,20 @@ multi-hazard-risk-system/
 │   └── pipeline.py            # orchestration + acceptance self-check
 ├── tests/                     # offline unit tests + synthetic fixtures
 ├── outputs/                   # rasters, statistics CSVs, GeoJSON, summary, caches
-├── frontend/                  # separate 3D design draft (see below)
+├── frontend/                  # geographic 3D viewer, terrain assets and data export
+├── hackathon_gifs/gifs/        # 18 animated explainers used in this README
 └── docs/                      # frontend plan and previews
 ```
 
 ## How it works
+
+<p align="center">
+  <img src="hackathon_gifs/gifs/02_architecture.gif" alt="Animated project architecture connecting Earth Engine, hazard models, risk fusion, routing and map delivery" width="960">
+</p>
+
+**One pipeline, two ways to explore the result.** Earth Engine provides the raster analysis; Python combines the
+layers and computes routes; Folium delivers the analytical map; the separate Canvas viewer provides geographic
+terrain exploration.
 
 ### 1. Study area (`gee_init.py`)
 
@@ -267,6 +372,10 @@ bounding box (lon 75.75–76.55, lat 11.45–12.05) is used. All analysis runs o
 (`finalize_layer`), so every statistic and map is scale-consistent.
 
 ### 2. Flood hazard (`hazard_flood.py`)
+
+<p align="center">
+  <img src="hackathon_gifs/gifs/03a_flood_layer.gif" alt="Flood-model animation showing Sentinel-1 backscatter, Otsu water extraction and refinement masks" width="800">
+</p>
 
 1. For each flood window (Aug 2018, Aug 2019, Jul–Aug 2024) build a **median VV (dB) composite** of Sentinel-1 IW scenes
    and apply a 30 m focal-median speckle filter.
@@ -281,6 +390,10 @@ bounding box (lon 75.75–76.55, lat 11.45–12.05) is used. All analysis runs o
    non-permanent occurrence (historical water exposure); winsorised min-max → 0–1.
 
 ### 3. Landslide susceptibility (`hazard_landslide.py`)
+
+<p align="center">
+  <img src="hackathon_gifs/gifs/03b_landslide_layer_and_validation.gif" alt="Landslide animation showing terrain, vegetation and rainfall factors and an event-zone validation check" width="800">
+</p>
 
 A Frequency-Ratio-style model: each conditioning factor is rated with literature-derived FR class values
 (FR > 1 = more landslide-prone than average) and combined with FR-AHP factor weights:
@@ -305,6 +418,10 @@ ratings). The result is saved to `outputs/landslide_validation.json`.
 
 ### 4. Fire hazard (`hazard_fire.py`)
 
+<p align="center">
+  <img src="hackathon_gifs/gifs/03c_fire_layer.gif" alt="Fire-model animation showing active-fire detections, density estimation and vegetation fuel weighting" width="800">
+</p>
+
 1. Count dry-season (Jan–May) active-fire detections over the last 10 years: **MODIS** (`FIRMS`, confidence ≥ 30 %) and
    **VIIRS** (`NASA/VIIRS/002/VNP14A1`, FireMask ≥ 7).
 2. Each daily image is clipped to the region **before** summing (reprojecting an unbounded sinusoidal-grid image to UTM
@@ -324,12 +441,44 @@ all classes.
 
 ### 6. Normalisation (`utils.py`)
 
+<details>
+<summary><strong>▶ See how different indicators become comparable</strong></summary>
+
+<p align="center">
+  <img src="hackathon_gifs/gifs/03d_normalisation.gif" alt="Animation rescaling hazard and exposure layers to a common zero-to-one index" width="800">
+</p>
+
+</details>
+
 Every layer is min-max rescaled to 0–1 inside the study area, with the **upper bound at the 99th percentile**
 (`NORMALIZE_UPPER_PERCENTILE`; values above are clamped to 1; set `None` for strict min-max). Without this, a handful
 of extreme pixels squash a sparse layer towards zero and distort the entropy weights. A degenerate (constant) layer
 becomes all zeros instead of dividing by zero.
 
 ### 7. MCDM and composite risk (`mcdm.py`)
+
+<p align="center">
+  <img src="hackathon_gifs/gifs/06a_why_mcdm.gif" alt="Animation explaining multi-criteria decision-making for different hazard and exposure indicators" width="800">
+</p>
+
+<details>
+<summary><strong>▶ Explore the weighting methods and sensitivity comparison</strong></summary>
+
+#### Expert priorities: AHP and consistency
+
+<img src="hackathon_gifs/gifs/06b_ahp_weights_and_consistency.gif" alt="AHP animation showing pairwise comparisons, criterion weights and the consistency-ratio check" width="800">
+
+#### Data-driven information: entropy, CRITIC and combined weights
+
+<img src="hackathon_gifs/gifs/06c_entropy_critic_combined_weights.gif" alt="Animation comparing entropy, CRITIC and combined AHP-plus-entropy weights" width="800">
+
+#### Sensitivity: how weighting changes the interpretation
+
+<img src="hackathon_gifs/gifs/06e_weight_sensitivity_robustness.gif" alt="Illustrative sensitivity animation showing how alternative criterion weights affect composite risk" width="800">
+
+The pipeline computes CRITIC as a comparison; the saved composite uses combined AHP + entropy weights.
+
+</details>
 
 * **AHP.** A Saaty pairwise matrix (order flood, landslide, exposure, fire) calibrated so its principal eigenvector
   reproduces the target weights 0.35 / 0.30 / 0.20 / 0.15 to ±0.005:
@@ -352,11 +501,28 @@ becomes all zeros instead of dividing by zero.
 
 ### 8. Hotspots (`hotspots.py`)
 
+<p align="center">
+  <img src="hackathon_gifs/gifs/06d_overlay_classes_hotspots.gif" alt="Animation progressing from weighted hazard overlay to five risk classes and hotspot extraction" width="800">
+</p>
+
 The Very High class raster is vectorised (8-connected), fragments below 0.05 km² are dropped, polygons are simplified,
 and each polygon gets area (km², computed in UTM), mean/max composite risk and the built-up area inside it
 (`outputs/hotspots.geojson`).
 
 ### 9. Least-risk emergency routing (`routing.py`)
+
+<p align="center">
+  <img src="hackathon_gifs/gifs/07c_shortest_vs_least_risk_routes.gif" alt="Illustrative comparison of shortest and least-risk routes from high-risk settlements to emergency destinations" width="960">
+</p>
+
+<details>
+<summary><strong>▶ See how the risk index becomes a road-edge cost</strong></summary>
+
+<p align="center">
+  <img src="hackathon_gifs/gifs/06f_risk_index_to_route_cost.gif" alt="Animation showing how sampled raster risk modifies road length to create the Dijkstra routing cost" width="800">
+</p>
+
+</details>
 
 * **Graph.** Directed drive network (`osm_pbf.py` or OSMnx), largest strongly connected component.
 * **Edge risk.** The composite raster is sampled at points every 50 m along each edge: `risk` = mean, `risk_max` = max;
@@ -507,8 +673,9 @@ It renders **real data from this pipeline**: SRTM elevation, a Sentinel-2 dry-se
 risk/flood/landslide/fire/exposure grids, hotspot polygons, OSM hospitals/shelters/places, and the saved shortest vs
 least-risk routes with their metrics. Click any point for the saved raster value and elevation; switch layers, 3D/2D,
 vertical exaggeration, opacity, hotspots and satellite imagery; use the *Emergency routes* tab to compare routes per
-settlement and destination type. Triangles are coloured from the mean of the raster cells beneath them (display
-anti-aliasing); click values are exact. Routes are saved model outputs, not live road conditions.
+settlement and destination type. The display mesh is reduced for interactive rendering, and the browser bundle
+quantises hazard indices to 254 levels (approximately ±0.002 display precision). Composite class labels come from
+the original saved class raster. Routes are saved model outputs, not live road conditions.
 
 Refresh the viewer's data snapshot after a pipeline run with `python frontend/export_data.py` (and
 `python frontend/fetch_terrain.py` to re-download the terrain/imagery assets). See [`frontend/README.md`](frontend/README.md)
@@ -569,3 +736,15 @@ Each module's docstring and inline comments cite the precedent for the step it i
 
 Add a `LICENSE` file before publishing (e.g. MIT). Data: OpenStreetMap © contributors (ODbL); Earth Engine datasets
 under their respective catalog licences.
+
+---
+
+<div align="center">
+
+<strong>From satellite observations to decisions on the ground.</strong>
+
+<p><sub>Wayanad, Kerala · Hazard mapping · Exposure analysis · Emergency routing</sub></p>
+
+<a href="#project-at-a-glance">Back to project overview ↑</a>
+
+</div>

@@ -191,3 +191,70 @@ def build_pois(pois: list, study_area: BaseGeometry) -> dict[str, gpd.GeoDataFra
     places = places[places["name"] != ""].reset_index(drop=True)
     log.info("OSM POIs: %d hospitals, %d shelters, %d named places", len(hospitals), len(shelters), len(places))
     return {"hospital": hospitals, "shelter": shelters, "place": places}
+
+
+def _facility_category(tags) -> str | None:
+    """First FACILITY_CATEGORIES entry whose tag rules match (None if none do)."""
+    if tags.get("amenity") == "shelter" and tags.get("shelter_type") in config.FACILITY_SHELTER_EXCLUDE_TYPES:
+        return None
+    for key, spec in config.FACILITY_CATEGORIES.items():
+        if _matches(tags, spec["tags"]):
+            if spec["named_only"] and not tags.get("name"):
+                continue
+            return key
+    return None
+
+
+def scan_facilities(study_area: BaseGeometry) -> list[dict]:
+    """Every facility / important place in the study area as {cat, name, lon, lat, sub} (cached as JSON).
+
+    One streaming pass over the extract; ways (buildings) are reduced to the mean of their node locations.
+    Categories and tag rules come from ``config.FACILITY_CATEGORIES``; towns/villages/etc. are category 'place'.
+    """
+    import json
+
+    if config.FACILITY_CACHE.exists():
+        return json.loads(config.FACILITY_CACHE.read_text(encoding="utf-8"))
+    ensure_pbf()
+    w, s, e, n = study_area.bounds
+    keys = ("amenity", "healthcare", "emergency", "place", "tourism", "shop", "office")
+    out: list[dict] = []
+    proc = osmium.FileProcessor(str(config.OSM_PBF_PATH)).with_locations().with_filter(osmium.filter.KeyFilter(*keys))
+    for obj in proc:
+        tags = obj.tags
+        if obj.is_node():
+            lon, lat = obj.location.lon, obj.location.lat
+        elif obj.is_way():
+            try:
+                pts = [(nd.location.lon, nd.location.lat) for nd in obj.nodes]
+            except osmium.InvalidLocationError:
+                continue
+            if not pts:
+                continue
+            lon, lat = float(np.mean([p[0] for p in pts])), float(np.mean([p[1] for p in pts]))
+        else:
+            continue
+        if not (w <= lon <= e and s <= lat <= n):
+            continue
+        place = tags.get("place")
+        if place in config.FACILITY_PLACE_TAGS and tags.get("name"):
+            cat, sub = "place", place
+        else:
+            cat = _facility_category(tags)
+            if cat is None:
+                continue
+            sub = tags.get("amenity") or tags.get("healthcare") or tags.get("tourism") or tags.get("shop")                 or tags.get("office") or tags.get("emergency") or ""
+        out.append({"cat": cat, "sub": sub, "name": tags.get("name", ""), "lon": round(lon, 5), "lat": round(lat, 5)})
+    keep = shapely.contains_xy(study_area, [f["lon"] for f in out], [f["lat"] for f in out])
+    out = [f for f, ok in zip(out, keep) if ok]
+    seen, unique = set(), []
+    for f in out:                                  # buildings tagged as both node and way would otherwise double up
+        key = (f["cat"], f["name"].lower(), round(f["lon"], 4), round(f["lat"], 4))
+        if key not in seen:
+            seen.add(key)
+            unique.append(f)
+    config.CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    config.FACILITY_CACHE.write_text(json.dumps(unique), encoding="utf-8")
+    log.info("Facilities: %d features (%s)", len(unique),
+             ", ".join(f"{k}={sum(1 for f in unique if f['cat'] == k)}" for k in [*config.FACILITY_CATEGORIES, "place"]))
+    return unique

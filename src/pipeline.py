@@ -16,7 +16,8 @@ import logging
 import geopandas as gpd
 
 import config
-from src import exposure, gee_init, hazard_fire, hazard_flood, hazard_landslide, hotspots, mcdm, rasters, routing
+from src import (exposure, gee_init, hazard_fire, hazard_flood, hazard_landslide, hotspots, mcdm, osm_pbf, rasters,
+                 routing)
 from src.utils import setup_logging
 
 log = logging.getLogger(__name__)
@@ -111,7 +112,12 @@ def run(from_cache: bool = False, build_map: bool = True, live_tiles: bool = Fal
 
     if build_map:
         from src import webmap
-        webmap.build_map(stack, summary, route_result, hs, live_layers=live_layers)
+        try:
+            facilities = osm_pbf.scan_facilities(geom)
+        except Exception as err:  # noqa: BLE001 - the map is still useful without the detailed facility layer
+            log.warning("Facility extraction failed (%s); the map is built without the facilities layer", err)
+            facilities = None
+        webmap.build_map(stack, summary, route_result, hs, live_layers=live_layers, facilities=facilities)
     _print_acceptance(summary, route_result)
     return {"stack": stack, "summary": summary, "routing": route_result, "hotspots": hs}
 

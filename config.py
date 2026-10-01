@@ -32,6 +32,7 @@ HOTSPOTS_GEOJSON = OUTPUT_DIR / "hotspots.geojson"
 VALIDATION_JSON = OUTPUT_DIR / "landslide_validation.json"
 GRAPH_CACHE = CACHE_DIR / "wayanad_drive.graphml"
 POI_CACHE = CACHE_DIR / "wayanad_pois.geojson"
+FACILITY_CACHE = CACHE_DIR / "facilities.json"
 AOI_CACHE = CACHE_DIR / "aoi.geojson"
 OSM_PBF_PATH = CACHE_DIR / "kerala.osm.pbf"
 
@@ -246,3 +247,44 @@ MAP_TITLE = "Multi-Hazard Risk & Emergency Routing — Wayanad District, Kerala"
 MAP_LAYER_OPACITY = 0.75
 ROUTE_SHORTEST_STYLE = {"color": "#555555", "weight": 4, "dashArray": "8 8", "opacity": 0.95}
 ROUTE_LEASTRISK_STYLE = {"color": "#00a63e", "weight": 5, "opacity": 0.95}
+
+# --------------------------------------------------------------------------- #
+# Detailed map: all facilities, road network and the two-place route search
+# --------------------------------------------------------------------------- #
+# Facilities shown by the "Facilities & roads" toggle. A feature is assigned to the FIRST category whose tag rules
+# match. `named_only` drops unnamed features (noise); safety-critical categories keep unnamed ones.
+FACILITY_CATEGORIES = {
+    "health": {"label": "Hospitals, clinics & pharmacies", "color": "#d43f3a", "named_only": False,
+               "tags": {"amenity": ["hospital", "clinic", "doctors", "dentist", "pharmacy"],
+                        "healthcare": ["hospital", "clinic", "centre", "doctor", "pharmacy", "alternative", "yes"]}},
+    "emergency": {"label": "Police, fire & emergency", "color": "#1f4e9c", "named_only": False,
+                  "tags": {"amenity": ["police", "fire_station", "ambulance_station"],
+                           "emergency": ["ambulance_station", "assembly_point"]}},
+    "shelter": {"label": "Shelters & community centres", "color": "#2e9e4f", "named_only": True,
+                "tags": {"amenity": ["community_centre", "shelter"], "emergency": ["shelter"]}},
+    "education": {"label": "Schools & colleges", "color": "#8e5bd0", "named_only": True,
+                  "tags": {"amenity": ["school", "college", "university"]}},
+    "government": {"label": "Government & post offices", "color": "#6b7280", "named_only": True,
+                   "tags": {"amenity": ["townhall", "courthouse", "post_office"], "office": ["government"]}},
+    "finance": {"label": "Banks & ATMs", "color": "#b8860b", "named_only": False,
+                "tags": {"amenity": ["bank", "atm"]}},
+    "fuel": {"label": "Fuel stations", "color": "#e67e22", "named_only": False, "tags": {"amenity": ["fuel"]}},
+    "transport": {"label": "Bus stations", "color": "#00838f", "named_only": False,
+                  "tags": {"amenity": ["bus_station"]}},
+    "market": {"label": "Markets & supermarkets", "color": "#c2185b", "named_only": True,
+               "tags": {"amenity": ["marketplace"], "shop": ["supermarket", "mall", "department_store"]}},
+    "worship": {"label": "Places of worship", "color": "#795548", "named_only": True,
+                "tags": {"amenity": ["place_of_worship", "monastery"]}},
+    "tourism": {"label": "Tourism & stays", "color": "#00a896", "named_only": True,
+                "tags": {"tourism": ["attraction", "viewpoint", "museum", "zoo", "hotel", "guest_house", "resort",
+                                     "camp_site"]}},
+}
+PLACE_CATEGORY = {"label": "Towns & villages", "color": "#455a64"}
+FACILITY_PLACE_TAGS = ["city", "town", "village", "hamlet", "suburb", "neighbourhood", "locality", "quarter"]
+FACILITY_SHELTER_EXCLUDE_TYPES = ("public_transport", "bus_stop", "picnic_shelter", "weather_shelter", "basic_hut", "lean_to")
+# Compact road graph embedded in index.html for in-browser routing (junction-to-junction, undirected).
+WEBGRAPH_SIMPLIFY_DEG = 0.00006          # ~7 m geometry simplification
+WEBGRAPH_SNAP_MAX_M = 2500               # a search location farther than this from any road is rejected
+SEARCH_CORRIDOR_KM = (0.5, 1, 2, 5)      # corridor widths offered in the search box
+SEARCH_CORRIDOR_DEFAULT_KM = 1
+ROAD_CLASS_COLORS = {"major": "#7a2e0e", "minor": "#9a6a3a", "local": "#b0a090"}
