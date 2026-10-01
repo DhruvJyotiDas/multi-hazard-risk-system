@@ -1,0 +1,6 @@
+class_id,class_name,index_min,index_max,area_km2,percent_of_study_area
+1,Very Low,0.0,0.1916,425.233,19.97
+2,Low,0.1916,0.2226,486.029,22.82
+3,Moderate,0.2226,0.2461,332.503,15.61
+4,High,0.2461,0.2929,454.624,21.35
+5,Very High,0.2929,1.0,431.413,20.26

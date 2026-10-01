@@ -1,0 +1,92 @@
+{
+  "weights": {
+    "flood": 0.55431,
+    "landslide": 0.155404,
+    "exposure": 0.127827,
+    "fire": 0.162459
+  },
+  "breaks": [
+    0.1916,
+    0.2226,
+    0.2461,
+    0.2929
+  ],
+  "risk_bounds": null,
+  "stats": [
+    {
+      "class_id": 1,
+      "class_name": "Very Low",
+      "index_min": 0.0,
+      "index_max": 0.1916,
+      "area_km2": 425.233,
+      "percent_of_study_area": 19.97
+    },
+    {
+      "class_id": 2,
+      "class_name": "Low",
+      "index_min": 0.1916,
+      "index_max": 0.2226,
+      "area_km2": 486.029,
+      "percent_of_study_area": 22.82
+    },
+    {
+      "class_id": 3,
+      "class_name": "Moderate",
+      "index_min": 0.2226,
+      "index_max": 0.2461,
+      "area_km2": 332.503,
+      "percent_of_study_area": 15.61
+    },
+    {
+      "class_id": 4,
+      "class_name": "High",
+      "index_min": 0.2461,
+      "index_max": 0.2929,
+      "area_km2": 454.624,
+      "percent_of_study_area": 21.35
+    },
+    {
+      "class_id": 5,
+      "class_name": "Very High",
+      "index_min": 0.2929,
+      "index_max": 1.0,
+      "area_km2": 431.413,
+      "percent_of_study_area": 20.26
+    }
+  ],
+  "weight_table": {
+    "flood": {
+      "target_AHP": 0.35,
+      "AHP": 0.346029,
+      "Entropy": 0.76259,
+      "AHP+Entropy (used)": 0.55431,
+      "CRITIC": 0.162111
+    },
+    "landslide": {
+      "target_AHP": 0.3,
+      "AHP": 0.304569,
+      "Entropy": 0.006239,
+      "AHP+Entropy (used)": 0.155404,
+      "CRITIC": 0.172612
+    },
+    "exposure": {
+      "target_AHP": 0.2,
+      "AHP": 0.199277,
+      "Entropy": 0.056377,
+      "AHP+Entropy (used)": 0.127827,
+      "CRITIC": 0.339511
+    },
+    "fire": {
+      "target_AHP": 0.15,
+      "AHP": 0.150124,
+      "Entropy": 0.174794,
+      "AHP+Entropy (used)": 0.162459,
+      "CRITIC": 0.325767
+    }
+  },
+  "ahp": {
+    "lambda_max": 4.051814559026732,
+    "ci": 0.017271519675577274,
+    "cr": 0.01919057741730808
+  }
+}

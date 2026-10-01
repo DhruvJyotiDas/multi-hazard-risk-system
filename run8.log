@@ -1,0 +1,18 @@
+12:11:01 | INFO    | src.gee_init | Study area: OSM polygon: Wayanad district, Kerala, India (2143 km2)
+*** Earth Engine *** Share your feedback by taking our Annual Developer Satisfaction Survey: https://google.qualtrics.com/jfe/form/SV_9oS0DRcPvElRMNw?source=python
+12:11:09 | INFO    | src.gee_init | Earth Engine initialised (project=rainfall-tank-analysis)
+12:11:09 | INFO    | src.gee_init | Study area: OSM polygon: Wayanad district, Kerala, India (2143 km2)
+12:11:18 | INFO    | src.routing | OSM network loaded from cache: 187194 nodes, 379258 edges
+12:11:27 | INFO    | src.exposure |   roads uploaded to EE: 17535 polylines, 52171 vertices, classes ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential'] (simplify 25 m)
+12:11:27 | INFO    | src.hazard_flood | Flood layer: Sentinel-1 VV, 3 flood windows
+12:11:36 | WARNING | src.hazard_flood | Otsu threshold -12.10 dB outside guard range [-22.0, -13.0]; clamped to -13.00
+12:11:36 | INFO    | src.hazard_flood |   window 2018-08-14..2018-08-26: 3 scenes, Otsu threshold = -13.00 dB
+12:11:43 | INFO    | src.hazard_flood |   window 2019-08-08..2019-08-20: 1 scenes, Otsu threshold = -13.10 dB
+12:11:50 | INFO    | src.hazard_flood |   window 2024-07-28..2024-08-09: 2 scenes, Otsu threshold = -13.30 dB
+12:11:54 | INFO    | src.hazard_flood | Flood layer computed (3/3 windows used)
+12:11:54 | INFO    | src.hazard_landslide | Landslide layer: slope + elevation + NDVI + max JJAS rainfall (FR-style)
+12:11:55 | INFO    | src.hazard_landslide |   NDVI composite from 90 Sentinel-2 scenes (2023-11-01..2024-04-30)
+12:13:07 | INFO    | src.hazard_landslide | Landslide layer computed (factor weights: {'slope': 0.4, 'rainfall': 0.25, 'ndvi': 0.2, 'elevation': 0.15})
+12:13:07 | INFO    | src.hazard_fire | Fire layer: MODIS/VIIRS active fires 2015-12-31..2025-12-31, months 1-5, kernel radius 5000 m
+12:13:19 | INFO    | src.hazard_fire | Fire layer computed ({'modis_days': 1504, 'viirs_days': 1510})
+12:13:19 | INFO    | src.exposure | Exposure layer: Dynamic World built-area + distance to roads

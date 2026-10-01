@@ -1,0 +1,53 @@
+{
+  "event": "July 2024 Mundakkai-Chooralmala landslide",
+  "quantile_breaks": [
+    0.43273565022976435,
+    0.4801818105833672,
+    0.527194895993186,
+    0.644276802512355
+  ],
+  "headline_passed": true,
+  "results": [
+    {
+      "label": "verified",
+      "lat": 11.486,
+      "lon": 76.156,
+      "buffer_m": 2000,
+      "point_class": 4,
+      "point_class_name": "High",
+      "point_index": 0.6424727197806503,
+      "zone_mean_index": 0.6208472176617326,
+      "zone_class_histogram": {
+        "Very Low": 0.0808,
+        "Low": 0.0105,
+        "Moderate": 0.2276,
+        "High": 0.2233,
+        "Very High": 0.4578
+      },
+      "zone_modal_class": "Very High",
+      "zone_fraction_high_or_very_high": 0.6811,
+      "zone_factor_contributions": {
+        "elevation": 0.21986152069849155,
+        "ndvi": 0.13548256978067696,
+        "rainfall": 0.225,
+        "slope": 0.34741063620393386
+      },
+      "aoi_factor_contributions": {
+        "elevation": 0.21071787518689497,
+        "ndvi": 0.16852792550157678,
+        "rainfall": 0.1801813253738807,
+        "slope": 0.23491409091756624
+      },
+      "passed": true
+    },
+    {
+      "label": "brief",
+      "lat": 11.49,
+      "lon": 76.23,
+      "buffer_m": 2000,
+      "outside_study_area": true,
+      "passed": false,
+      "note": "zone has no valid pixels: the coordinate lies outside the study area"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+11:36:30 | INFO    | src.gee_init | Study area: OSM polygon: Wayanad district, Kerala, India (2143 km2)
+*** Earth Engine *** Share your feedback by taking our Annual Developer Satisfaction Survey: https://google.qualtrics.com/jfe/form/SV_9oS0DRcPvElRMNw?source=python
+11:36:32 | INFO    | src.gee_init | Earth Engine initialised (project=rainfall-tank-analysis)
+11:36:32 | INFO    | src.gee_init | Study area: OSM polygon: Wayanad district, Kerala, India (2143 km2)
+11:36:40 | INFO    | src.routing | OSM network loaded from cache: 187194 nodes, 379258 edges
+11:36:50 | INFO    | src.exposure |   roads uploaded to EE: 17535 polylines, 52171 vertices, classes ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential'] (simplify 25 m)
+11:36:50 | INFO    | src.hazard_flood | Flood layer: Sentinel-1 VV, 3 flood windows
+11:36:51 | WARNING | src.hazard_flood | Otsu threshold -12.10 dB outside guard range [-22.0, -13.0]; clamped to -13.00
+11:36:51 | INFO    | src.hazard_flood |   window 2018-08-14..2018-08-26: 3 scenes, Otsu threshold = -13.00 dB
+11:36:52 | INFO    | src.hazard_flood |   window 2019-08-08..2019-08-20: 1 scenes, Otsu threshold = -13.10 dB
+11:36:53 | INFO    | src.hazard_flood |   window 2024-07-28..2024-08-09: 2 scenes, Otsu threshold = -13.30 dB
+11:36:57 | INFO    | src.hazard_flood | Flood layer computed (3/3 windows used)
+11:36:57 | INFO    | src.hazard_landslide | Landslide layer: slope + elevation + NDVI + max JJAS rainfall (FR-style)
+11:36:59 | INFO    | src.hazard_landslide |   NDVI composite from 90 Sentinel-2 scenes (2023-11-01..2024-04-30)
+11:37:41 | INFO    | src.hazard_landslide | Landslide layer computed (factor weights: {'slope': 0.4, 'rainfall': 0.25, 'ndvi': 0.2, 'elevation': 0.15})
+11:37:41 | INFO    | src.hazard_fire | Fire layer: MODIS/VIIRS active fires 2015-12-31..2025-12-31, months 1-5, kernel radius 5000 m
+11:38:29 | INFO    | src.hazard_fire | Fire layer computed ({'modis_days': 1504, 'viirs_days': 1510})
+11:38:29 | INFO    | src.exposure | Exposure layer: Dynamic World built-area + distance to roads
+11:39:09 | INFO    | src.exposure | Exposure layer computed
+11:39:51 | INFO    | src.hazard_landslide | ==============================================================================
+11:39:51 | INFO    | src.hazard_landslide | VALIDATION GATE -- July 2024 Mundakkai-Chooralmala landslide (quantile breaks on LSI: [0.433, 0.48, 0.527, 0.644])
+11:39:51 | INFO    | src.hazard_landslide | [PASS] verified point (11.4860 N, 76.1560 E): point class=4 (High), zone mean LSI=0.621, modal zone class=Very High, 68% of 2000 m zone in High/Very High  -> PASS
+11:39:51 | INFO    | src.hazard_landslide |       zone class shares: {'Very Low': 0.0808, 'Low': 0.0105, 'Moderate': 0.2276, 'High': 0.2233, 'Very High': 0.4578}
+11:39:51 | INFO    | src.hazard_landslide | [N/A ] brief point (11.4900 N, 76.2300 E): zone has no valid pixels: the coordinate lies outside the study area
+11:39:51 | INFO    | src.hazard_landslide | HEADLINE VALIDATION (verified event location): PASS
+11:39:51 | INFO    | src.hazard_landslide | ==============================================================================
+11:41:03 | INFO    | src.mcdm |   sampled 20248 pixels for entropy/CRITIC weights
+11:41:03 | INFO    | src.mcdm | AHP: lambda_max=4.0518  CI=0.0173  CR=0.0192  -> CONSISTENT (< 0.10)
+11:41:03 | INFO    | src.mcdm | MCDM weights (side by side):
+           target_AHP     AHP  Entropy  AHP+Entropy (used)  CRITIC
+criterion                                                         
+flood            0.35  0.3460   0.7626              0.5543  0.1621
+landslide        0.30  0.3046   0.0062              0.1554  0.1726
+exposure         0.20  0.1993   0.0564              0.1278  0.3395
+fire             0.15  0.1501   0.1748              0.1625  0.3258
+11:41:03 | INFO    | src.mcdm | Combined weights used: {'flood': 0.5543, 'landslide': 0.1554, 'exposure': 0.1278, 'fire': 0.1625}
+11:43:22 | INFO    | src.mcdm | Risk class breaks (quantile): [0.1916, 0.2226, 0.2461, 0.2929]
+11:46:11 | INFO    | src.mcdm | Risk-class statistics (total 2129.8 km2) saved to C:\Users\dhruv\OneDrive\Desktop\GEO\multi-hazard-risk-system\outputs\risk_stats.csv:
+ class_id class_name  index_min  index_max  area_km2  percent_of_study_area
+        1   Very Low     0.0000     0.1916   425.233                  19.97
+        2        Low     0.1916     0.2226   486.029                  22.82
+        3   Moderate     0.2226     0.2461   332.503                  15.61
+        4       High     0.2461     0.2929   454.624                  21.35
+        5  Very High     0.2929     1.0000   431.413                  20.26
+11:46:11 | INFO    | src.rasters | Exporting 7 rasters at 100 m from Earth Engine ...
+11:46:39 | WARNING | src.rasters | Multi-band export failed (400 Client Error: Bad Request for url: https://earthengine.googleapis.com/v1/projects/rainfall-tank-analysis/thumbnails/25d8c4a56a18e3d379a62d9580e29b59-7d14119f0c3cd620398445c3646d5f79:getPixels); retrying band by band

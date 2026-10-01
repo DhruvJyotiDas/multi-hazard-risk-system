@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101916">
+  <title>Wayanad · Risk Observatory</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="Wayanad Risk Observatory home"><span class="brand-mark">◈</span><span>WAYANAD<span class="brand-sub">RISK OBSERVATORY</span></span></a>
+    <nav aria-label="Workspace"><button class="nav-button active" data-tab="overview">Overview</button><button class="nav-button" data-tab="routing">Emergency routes</button><button class="nav-button" data-tab="methods">Model &amp; data</button></nav>
+    <div class="header-end"><span class="status-dot"></span><span>Frontend draft</span><button id="export" class="button quiet">↓ Export view</button></div>
+  </header>
+  <main>
+    <div class="page-heading"><div><div class="eyebrow">GEOSPATIAL DECISION SUPPORT / KERALA, INDIA</div><h1>A clearer view of risk<span>.</span></h1><p>Explore the landscape. Understand exposure. Find a safer way.</p></div><div class="region-tag"><span>◎</span><div>Wayanad district<small>Western Ghats · 11.72° N, 76.08° E</small></div></div></div>
+    <section class="metrics" aria-label="Saved analysis summary">
+      <article><span class="metric-label">ANALYSED LAND AREA <span>↗</span></span><div><strong id="area">2,130</strong><span>km²</span></div><small>Saved classified raster area</small></article>
+      <article><span class="metric-label">HIGH + VERY HIGH RISK <span class="orange">●</span></span><div><strong id="high-risk">41.6</strong><span>% of area</span></div><small id="high-area">886 km² in elevated risk classes</small></article>
+      <article><span class="metric-label">HAZARD DIMENSIONS <span>◇</span></span><div><strong>04</strong><span>integrated layers</span></div><small>Flood · landslide · fire · exposure</small></article>
+      <article><span class="metric-label">2024 EVENT VALIDATION <span class="mint">✓</span></span><div><strong id="validation-status" class="mint">PASS</strong><span id="validation-share">68.1% high risk</span></div><small>Mundakkai–Chooralmala · 2 km zone</small></article>
+    </section>
+    <section class="workspace" aria-label="Interactive terrain workspace">
+      <aside class="layer-panel"><div class="panel-title"><h2>Map layers</h2><span>04</span></div><p class="muted">Choose a lens on the landscape</p>
+        <button class="layer active" data-layer="risk"><span class="layer-icon composite">◈</span><span>Composite risk<small>AHP + entropy overlay</small></span><span class="radio"></span></button>
+        <div class="section-label">HAZARD &amp; EXPOSURE</div>
+        <button class="layer" data-layer="flood"><span class="layer-icon flood">≈</span><span>Flood susceptibility<small>Sentinel-1 · JRC water</small></span><span class="radio"></span></button>
+        <button class="layer" data-layer="landslide"><span class="layer-icon slide">△</span><span>Landslide susceptibility<small>SRTM · NDVI · rainfall</small></span><span class="radio"></span></button>
+        <button class="layer" data-layer="fire"><span class="layer-icon fire">♨</span><span>Fire susceptibility<small>MODIS / VIIRS · fuel cover</small></span><span class="radio"></span></button>
+        <button class="layer" data-layer="exposure"><span class="layer-icon exposure">▥</span><span>Settlement exposure<small>Built area · road proximity</small></span><span class="radio"></span></button>
+        <div class="slider-row"><label for="opacity">Layer opacity</label><output id="opacity-value">70%</output></div><input id="opacity" type="range" min="0" max="100" value="70">
+        <div class="divider"></div><div class="section-label">MAP DETAILS</div>
+        <label class="toggle-row">Settlement markers<input type="checkbox" id="markers" checked=""><span class="switch"></span></label>
+        <label class="toggle-row">Route comparison<input type="checkbox" id="routes" checked=""><span class="switch"></span></label>
+        <label class="toggle-row">Terrain wireframe<input type="checkbox" id="wireframe"><span class="switch"></span></label>
+        <div class="slider-row"><label for="elevation">Vertical exaggeration</label><output id="elevation-value">1.4×</output></div><input id="elevation" type="range" min="0" max="250" value="140">
+        <div class="layer-note"><span>ⓘ</span><p>Illustrative terrain and hazard surfaces. Summary cards use saved project results.</p></div>
+      </aside>
+      <div class="scene" id="scene"><canvas id="terrain" tabindex="0" aria-label="Illustrative 3D terrain. Drag or use arrow keys to rotate, scroll or use plus and minus to zoom. Click to inspect a point." width="793" height="782"></canvas>
+        <div class="scene-header"><span class="scene-tag"><span class="status-dot"></span> TERRAIN EXPLORER</span><div class="view-switch"><button id="view3d" class="selected">3D</button><button id="view2d">2D</button></div></div>
+        <div class="scene-caption"><h2>Wayanad, in perspective.</h2><p id="scene-layer">Composite multi-hazard risk</p></div>
+        <div class="map-controls"><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button><button id="reset" aria-label="Reset camera">⌖</button></div>
+        <div class="compass"><span>N</span><div id="compass-arrow" style="transform: rotate(18.3346deg);">↑</div></div>
+        <div id="inspect" class="inspect" hidden="" aria-live="polite"><button id="close-inspect" aria-label="Close inspection">×</button><div class="eyebrow">ILLUSTRATIVE SAMPLE</div><strong id="inspect-class"></strong><p id="inspect-value"></p><small id="inspect-coords"></small></div>
+        <div class="map-bottom"><div class="legend"><span id="legend-title">COMPOSITE RISK</span><div class="ramp" id="ramp"></div><div class="legend-labels"><span>Very low</span><span>Very high</span></div></div><span class="interaction-hint">Drag to orbit · scroll to zoom · click to inspect</span></div>
+        <div class="scene-footer"><span>ILLUSTRATIVE 3D SCENE · NOT A NAVIGATION MAP</span><span id="scene-state">3D / 1.4× ELEVATION</span></div>
+      </div>
+      <aside class="insights-panel">
+        <div id="overview-panel"><div class="panel-title"><h2>Risk distribution</h2><span class="pill">Saved run</span></div><p class="muted">Five classes. One regional picture.</p><div id="distribution"><div class="distribution-row"><div class="distribution-label"><span class="dot" style="background: rgb(112, 142, 89);"></span><span>Very Low</span><span class="percent">20.0%</span></div><div class="bar-track"><div class="bar" style="width: 19.97%; background: rgb(112, 142, 89);"></div></div><small>425 km²</small></div><div class="distribution-row"><div class="distribution-label"><span class="dot" style="background: rgb(168, 190, 115);"></span><span>Low</span><span class="percent">22.8%</span></div><div class="bar-track"><div class="bar" style="width: 22.82%; background: rgb(168, 190, 115);"></div></div><small>486 km²</small></div><div class="distribution-row"><div class="distribution-label"><span class="dot" style="background: rgb(219, 193, 109);"></span><span>Moderate</span><span class="percent">15.6%</span></div><div class="bar-track"><div class="bar" style="width: 15.61%; background: rgb(219, 193, 109);"></div></div><small>333 km²</small></div><div class="distribution-row"><div class="distribution-label"><span class="dot" style="background: rgb(222, 151, 95);"></span><span>High</span><span class="percent">21.4%</span></div><div class="bar-track"><div class="bar" style="width: 21.35%; background: rgb(222, 151, 95);"></div></div><small>455 km²</small></div><div class="distribution-row"><div class="distribution-label"><span class="dot" style="background: rgb(191, 98, 86);"></span><span>Very High</span><span class="percent">20.3%</span></div><div class="bar-track"><div class="bar" style="width: 20.26%; background: rgb(191, 98, 86);"></div></div><small>431 km²</small></div></div><div class="insight-callout"><span>↗</span><p><strong id="risk-callout">41.6% in elevated risk classes</strong><small>High and very high classes combined</small></p></div>
+        <div class="divider"></div><div class="panel-title"><h2>Event validation</h2><span class="mint">◉</span></div><p class="validation-name">Mundakkai–Chooralmala</p><p class="muted">July 2024 landslide · saved model check</p><div class="validation-box"><span id="validation-badge">✓ VALIDATION PASSED</span><p id="validation-detail">68.1% of the 2 km event zone is classified High or Very High. Saved point class: High.</p></div><button class="text-button" id="focus-event">Inspect event location <span>↗</span></button></div>
+        <div id="routing-panel" hidden=""><div class="panel-title"><h2>Emergency routes</h2><span class="pill">Demo</span></div><p class="muted">Compare distance and hazard exposure.</p><label class="section-label" for="origin">ILLUSTRATIVE ORIGIN</label><select id="origin"><option value="0">Southern settlement</option><option value="1">Central settlement</option><option value="2">Eastern settlement</option></select><div class="route-card"><span class="mint">━ Least-risk path</span><strong id="safe-distance">8.6 km</strong><small id="safe-risk">Mean risk 0.21 · illustrative</small></div><div class="route-card"><span>┄ Shortest path</span><strong id="short-distance">7.2 km</strong><small id="short-risk">Mean risk 0.38 · illustrative</small></div><div class="insight-callout"><span>↗</span><p><strong id="route-reduction">44.7% lower mean risk</strong><small id="route-increase">19.4% longer distance · demo comparison</small></p></div><p class="muted">These example paths and metrics demonstrate the comparison UI. They are not computed OSM routes.</p><div class="divider"></div><h2>Routing model</h2><p class="muted">Dijkstra minimises length × (1 + 3 × mean risk). The Python pipeline computes both paths to hospitals and shelters.</p></div>
+        <div id="methods-panel" hidden=""><div class="panel-title"><h2>Model &amp; data</h2><span class="pill">MCDM</span></div><p class="muted">Saved combined AHP + entropy weights</p><div id="weights"><div class="weight-row"><span>Flood</span><span class="mint">55.4%</span></div><div class="weight-row"><span>Landslide</span><span class="mint">15.5%</span></div><div class="weight-row"><span>Exposure</span><span class="mint">12.8%</span></div><div class="weight-row"><span>Fire</span><span class="mint">16.2%</span></div></div><div class="divider"></div><h2>From satellite to decision</h2><ol class="method-list"><li><strong>Observe</strong><small>Sentinel-1/2, SRTM, CHIRPS, JRC, MODIS/VIIRS, Dynamic World</small></li><li><strong>Model</strong><small>Normalise hazard and exposure to 0–1; combine AHP and entropy weights</small></li><li><strong>Respond</strong><small>Extract hotspots and compare shortest vs least-risk OSM routes</small></li></ol><div class="validation-box"><span>DATA STATUS</span><p id="data-status">Saved statistics, weights and validation loaded. Computed route output is not available. Terrain is procedural, not an SRTM elevation model.</p></div><p class="muted">Class thresholds are quantiles from the saved run. Illustrative scene values are separate from those results.</p></div>
+        <div class="source-footer"><span class="status-dot"></span> Research decision-support prototype</div>
+      </aside>
+    </section>
+    <footer class="page-footer"><span>WAYANAD RISK OBSERVATORY <span class="muted">/ Satellite data → model → recommendation</span></span><span class="muted">Design draft 01 · Terrain &amp; response</span></footer>
+  </main>
+  <script src="data.js"></script><script src="app.js"></script>
+
+
+</body></html>

@@ -1,0 +1,5 @@
+10:38:13 | INFO    | src.gee_init | Study area: OSM polygon: Wayanad district, Kerala, India (2143 km2)
+*** Earth Engine *** Share your feedback by taking our Annual Developer Satisfaction Survey: https://google.qualtrics.com/jfe/form/SV_9oS0DRcPvElRMNw?source=python
+10:38:17 | INFO    | src.gee_init | Earth Engine initialised (project=rainfall-tank-analysis)
+10:38:17 | INFO    | src.gee_init | Study area: OSM polygon: Wayanad district, Kerala, India (2143 km2)
+10:38:24 | INFO    | src.routing | OSM network loaded from cache: 187194 nodes, 379258 edges

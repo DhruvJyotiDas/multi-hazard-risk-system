@@ -1,0 +1,36 @@
+11:21:29 | INFO    | src.gee_init | Study area: OSM polygon: Wayanad district, Kerala, India (2143 km2)
+*** Earth Engine *** Share your feedback by taking our Annual Developer Satisfaction Survey: https://google.qualtrics.com/jfe/form/SV_9oS0DRcPvElRMNw?source=python
+11:21:34 | INFO    | src.gee_init | Earth Engine initialised (project=rainfall-tank-analysis)
+11:21:34 | INFO    | src.gee_init | Study area: OSM polygon: Wayanad district, Kerala, India (2143 km2)
+11:21:43 | INFO    | src.routing | OSM network loaded from cache: 187194 nodes, 379258 edges
+11:21:52 | INFO    | src.exposure |   roads uploaded to EE: 17535 polylines, 52171 vertices, classes ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential'] (simplify 25 m)
+11:21:52 | INFO    | src.hazard_flood | Flood layer: Sentinel-1 VV, 3 flood windows
+11:21:53 | WARNING | src.hazard_flood | Otsu threshold -12.10 dB outside guard range [-22.0, -13.0]; clamped to -13.00
+11:21:53 | INFO    | src.hazard_flood |   window 2018-08-14..2018-08-26: 3 scenes, Otsu threshold = -13.00 dB
+11:21:54 | INFO    | src.hazard_flood |   window 2019-08-08..2019-08-20: 1 scenes, Otsu threshold = -13.10 dB
+11:21:56 | INFO    | src.hazard_flood |   window 2024-07-28..2024-08-09: 2 scenes, Otsu threshold = -13.30 dB
+11:21:58 | INFO    | src.hazard_flood | Flood layer computed (3/3 windows used)
+11:21:58 | INFO    | src.hazard_landslide | Landslide layer: slope + elevation + NDVI + max JJAS rainfall (FR-style)
+11:22:00 | INFO    | src.hazard_landslide |   NDVI composite from 90 Sentinel-2 scenes (2023-11-01..2024-04-30)
+11:22:02 | INFO    | src.hazard_landslide | Landslide layer computed (factor weights: {'slope': 0.4, 'rainfall': 0.25, 'ndvi': 0.2, 'elevation': 0.15})
+11:22:02 | INFO    | src.hazard_fire | Fire layer: MODIS/VIIRS active fires 2015-12-31..2025-12-31, months 1-5, kernel radius 5000 m
+11:22:50 | INFO    | src.hazard_fire | Fire layer computed ({'modis_days': 1504, 'viirs_days': 1510})
+11:22:50 | INFO    | src.exposure | Exposure layer: Dynamic World built-area + distance to roads
+11:23:32 | INFO    | src.exposure | Exposure layer computed
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\dhruv\OneDrive\Desktop\GEO\multi-hazard-risk-system\src\webmap.py", line 477, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "C:\Users\dhruv\OneDrive\Desktop\GEO\multi-hazard-risk-system\src\webmap.py", line 469, in main
+    pipeline.run(from_cache=args.from_cache, live_tiles=args.live_tiles)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dhruv\OneDrive\Desktop\GEO\multi-hazard-risk-system\src\pipeline.py", line 69, in run
+    validation = hazard_landslide.validate_event_zone(aoi, res["landslide"])
+  File "C:\Users\dhruv\OneDrive\Desktop\GEO\multi-hazard-risk-system\src\hazard_landslide.py", line 181, in validate_event_zone
+    results = [_validate_point(lbl, lat, lon, class_img, image, contrib_img, aoi_means) for lbl, lat, lon in points]
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dhruv\OneDrive\Desktop\GEO\multi-hazard-risk-system\src\hazard_landslide.py", line 134, in _validate_point
+    raise RuntimeError(f"Event zone '{label}' has no valid pixels (is it inside the study area?)")
+RuntimeError: Event zone 'brief' has no valid pixels (is it inside the study area?)
