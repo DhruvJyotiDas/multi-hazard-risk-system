@@ -106,7 +106,9 @@ def scan_extract(study_area: BaseGeometry) -> tuple[list, list]:
             continue
         for kind, wanted in kinds:
             if _matches(tags, wanted):
-                pois.append({"kind": kind, "name": tags.get("name", ""), "lon": lon, "lat": lat})
+                pois.append({"kind": kind, "name": tags.get("name", ""), "lon": lon, "lat": lat,
+                             "amenity": tags.get("amenity", ""), "emergency": tags.get("emergency", ""),
+                             "shelter_type": tags.get("shelter_type", "")})
     log.info("PBF scan: %d drivable ways, %d POI features in the study-area bbox", len(ways), len(pois))
     return ways, pois
 
@@ -140,12 +142,21 @@ def build_graph(ways: list, study_area: BaseGeometry) -> nx.MultiDiGraph:
     return G
 
 
+def _emergency_mask(hospitals: gpd.GeoDataFrame, df: pd.DataFrame) -> np.ndarray:
+    """True for hospitals located at an OSM feature tagged emergency=yes (matched on rounded coordinates)."""
+    em = df[(df["kind"] == "hospital") & (df["emergency"] == "yes")]
+    keys = {(round(x, 5), round(y, 5)) for x, y in zip(em["lon"], em["lat"])}
+    return np.array([(round(g.x, 5), round(g.y, 5)) in keys for g in hospitals.geometry], dtype=bool)
+
+
 def build_pois(pois: list, study_area: BaseGeometry) -> dict[str, gpd.GeoDataFrame]:
     """Hospitals, shelters and named places inside the study area (hospital falls back to clinics)."""
     df = pd.DataFrame(pois)
 
-    def frame(kind: str, out_kind: str) -> gpd.GeoDataFrame:
+    def frame(kind: str, out_kind: str, keep=None) -> gpd.GeoDataFrame:
         sub = df[df["kind"] == kind] if not df.empty else df
+        if keep is not None and not sub.empty:
+            sub = sub[keep(sub)]
         if sub.empty:
             return gpd.GeoDataFrame({"name": [], "kind": []}, geometry=[], crs="EPSG:4326")
         g = gpd.GeoDataFrame({"name": sub["name"].values, "kind": out_kind},
@@ -157,10 +168,25 @@ def build_pois(pois: list, study_area: BaseGeometry) -> dict[str, gpd.GeoDataFra
     # mis-tagged dental clinics, pharmacies, labs ... are not emergency destinations
     hospitals = hospitals[~hospitals["name"].str.contains(config.HOSPITAL_NAME_EXCLUDE, case=False, regex=True,
                                                           na=False)].reset_index(drop=True)
+    if config.HOSPITAL_MAJOR_ONLY:
+        major_name = hospitals["name"].str.contains(config.HOSPITAL_MAJOR_REGEX, case=False, regex=True, na=False)
+        major = hospitals[major_name.values | _emergency_mask(hospitals, df)].reset_index(drop=True)
+        if len(major) >= config.HOSPITAL_MIN_MAJOR:
+            log.info("Hospitals: %d major facilities kept out of %d (emergency=yes or taluk/district/general/...)",
+                     len(major), len(hospitals))
+            hospitals = major
+        else:
+            log.warning("Only %d major hospitals found; keeping all %d hospitals", len(major), len(hospitals))
     if hospitals.empty:
         log.warning("No OSM hospitals found -- falling back to clinics / doctors")
         hospitals = frame("hospital_fb", "hospital")
-    shelters = frame("shelter", "shelter")
+
+    def shelter_ok(sub):
+        not_transport = ~sub["shelter_type"].isin(config.SHELTER_EXCLUDE_TYPES)
+        big_school = sub["name"].str.contains(config.SCHOOL_SHELTER_REGEX, case=False, regex=True, na=False)
+        return not_transport & ((sub["amenity"] != "school") | big_school)
+
+    shelters = frame("shelter", "shelter", keep=shelter_ok)
     places = frame("place", "place")
     places = places[places["name"] != ""].reset_index(drop=True)
     log.info("OSM POIs: %d hospitals, %d shelters, %d named places", len(hospitals), len(shelters), len(places))

@@ -1,0 +1,330 @@
+{
+  "study_area": "OSM polygon: Wayanad district, Kerala, India",
+  "study_area_km2": 2142.6803082785973,
+  "breaks": [
+    0.1916,
+    0.2226,
+    0.2461,
+    0.2929
+  ],
+  "stats": [
+    {
+      "class_id": 1,
+      "class_name": "Very Low",
+      "index_min": 0.0,
+      "index_max": 0.1916,
+      "area_km2": 425.233,
+      "percent_of_study_area": 19.97
+    },
+    {
+      "class_id": 2,
+      "class_name": "Low",
+      "index_min": 0.1916,
+      "index_max": 0.2226,
+      "area_km2": 486.029,
+      "percent_of_study_area": 22.82
+    },
+    {
+      "class_id": 3,
+      "class_name": "Moderate",
+      "index_min": 0.2226,
+      "index_max": 0.2461,
+      "area_km2": 332.503,
+      "percent_of_study_area": 15.61
+    },
+    {
+      "class_id": 4,
+      "class_name": "High",
+      "index_min": 0.2461,
+      "index_max": 0.2929,
+      "area_km2": 454.624,
+      "percent_of_study_area": 21.35
+    },
+    {
+      "class_id": 5,
+      "class_name": "Very High",
+      "index_min": 0.2929,
+      "index_max": 1.0,
+      "area_km2": 431.413,
+      "percent_of_study_area": 20.26
+    }
+  ],
+  "weight_table": {
+    "flood": {
+      "target_AHP": 0.35,
+      "AHP": 0.346029,
+      "Entropy": 0.76259,
+      "AHP+Entropy (used)": 0.55431,
+      "CRITIC": 0.162111
+    },
+    "landslide": {
+      "target_AHP": 0.3,
+      "AHP": 0.304569,
+      "Entropy": 0.006239,
+      "AHP+Entropy (used)": 0.155404,
+      "CRITIC": 0.172612
+    },
+    "exposure": {
+      "target_AHP": 0.2,
+      "AHP": 0.199277,
+      "Entropy": 0.056377,
+      "AHP+Entropy (used)": 0.127827,
+      "CRITIC": 0.339511
+    },
+    "fire": {
+      "target_AHP": 0.15,
+      "AHP": 0.150124,
+      "Entropy": 0.174794,
+      "AHP+Entropy (used)": 0.162459,
+      "CRITIC": 0.325767
+    }
+  },
+  "ahp": {
+    "lambda_max": 4.051814559026732,
+    "ci": 0.017271519675577274,
+    "cr": 0.01919057741730808
+  },
+  "validation": {
+    "event": "July 2024 Mundakkai-Chooralmala landslide",
+    "quantile_breaks": [
+      0.43273565022976435,
+      0.4801818105833672,
+      0.527194895993186,
+      0.644276802512355
+    ],
+    "headline_passed": true,
+    "results": [
+      {
+        "label": "verified",
+        "lat": 11.486,
+        "lon": 76.156,
+        "buffer_m": 2000,
+        "point_class": 4,
+        "point_class_name": "High",
+        "point_index": 0.6424727197806503,
+        "zone_mean_index": 0.6208472176617326,
+        "zone_class_histogram": {
+          "Very Low": 0.0808,
+          "Low": 0.0105,
+          "Moderate": 0.2276,
+          "High": 0.2233,
+          "Very High": 0.4578
+        },
+        "zone_modal_class": "Very High",
+        "zone_fraction_high_or_very_high": 0.6811,
+        "zone_factor_contributions": {
+          "elevation": 0.21986152069849155,
+          "ndvi": 0.13548256978067696,
+          "rainfall": 0.225,
+          "slope": 0.34741063620393386
+        },
+        "aoi_factor_contributions": {
+          "elevation": 0.21071787518689497,
+          "ndvi": 0.16852792550157678,
+          "rainfall": 0.1801813253738807,
+          "slope": 0.23491409091756624
+        },
+        "passed": true
+      },
+      {
+        "label": "brief",
+        "lat": 11.49,
+        "lon": 76.23,
+        "buffer_m": 2000,
+        "outside_study_area": true,
+        "passed": false,
+        "note": "zone has no valid pixels: the coordinate lies outside the study area"
+      }
+    ]
+  },
+  "flood_thresholds": [
+    {
+      "window": "2018-08-14..2018-08-26",
+      "scenes": 3,
+      "otsu_db": -13.0
+    },
+    {
+      "window": "2019-08-08..2019-08-20",
+      "scenes": 1,
+      "otsu_db": -13.099
+    },
+    {
+      "window": "2024-07-28..2024-08-09",
+      "scenes": 2,
+      "otsu_db": -13.304
+    }
+  ],
+  "fire_detections": {
+    "modis_days": 1504,
+    "viirs_days": 1510
+  },
+  "hotspots": {
+    "n_hotspots": 351,
+    "total_area_km2": 401.91,
+    "percent_of_study_area": 18.76,
+    "largest_km2": 130.84,
+    "built_area_km2": 53.55
+  },
+  "routes": [
+    {
+      "origin_id": 1,
+      "origin": "Kallumukku",
+      "destination_type": "Hospital",
+      "destination": "Government Taluk Hospital",
+      "shortest_km": 9.281,
+      "least_risk_km": 9.281,
+      "distance_increase_pct": 0.0,
+      "shortest_mean_risk": 0.3347,
+      "least_risk_mean_risk": 0.3347,
+      "shortest_max_risk": 0.3992,
+      "least_risk_max_risk": 0.3992,
+      "mean_risk_reduction_pct": 0.0,
+      "exposure_reduction_pct": 0.0,
+      "same_route": true
+    },
+    {
+      "origin_id": 1,
+      "origin": "Kallumukku",
+      "destination_type": "Shelter",
+      "destination": "Govt Higher Secondary School Kalloor",
+      "shortest_km": 0.404,
+      "least_risk_km": 0.404,
+      "distance_increase_pct": 0.0,
+      "shortest_mean_risk": 0.3793,
+      "least_risk_mean_risk": 0.3793,
+      "shortest_max_risk": 0.3992,
+      "least_risk_max_risk": 0.3992,
+      "mean_risk_reduction_pct": 0.0,
+      "exposure_reduction_pct": 0.0,
+      "same_route": true
+    },
+    {
+      "origin_id": 2,
+      "origin": "Padinjarethara",
+      "destination_type": "Hospital",
+      "destination": "K J Medical Trust Hospital",
+      "shortest_km": 18.448,
+      "least_risk_km": 18.448,
+      "distance_increase_pct": 0.0,
+      "shortest_mean_risk": 0.2744,
+      "least_risk_mean_risk": 0.2744,
+      "shortest_max_risk": 0.8644,
+      "least_risk_max_risk": 0.8644,
+      "mean_risk_reduction_pct": 0.0,
+      "exposure_reduction_pct": 0.0,
+      "same_route": true
+    },
+    {
+      "origin_id": 2,
+      "origin": "Padinjarethara",
+      "destination_type": "Shelter",
+      "destination": "Panchayat Auditorium",
+      "shortest_km": 1.335,
+      "least_risk_km": 1.335,
+      "distance_increase_pct": 0.0,
+      "shortest_mean_risk": 0.3319,
+      "least_risk_mean_risk": 0.3319,
+      "shortest_max_risk": 0.3609,
+      "least_risk_max_risk": 0.3609,
+      "mean_risk_reduction_pct": 0.0,
+      "exposure_reduction_pct": 0.0,
+      "same_route": true
+    },
+    {
+      "origin_id": 3,
+      "origin": "Panamaram",
+      "destination_type": "Hospital",
+      "destination": "District Hospital Mananthavady",
+      "shortest_km": 14.113,
+      "least_risk_km": 14.871,
+      "distance_increase_pct": 5.37,
+      "shortest_mean_risk": 0.3675,
+      "least_risk_mean_risk": 0.2998,
+      "shortest_max_risk": 1.0,
+      "least_risk_max_risk": 1.0,
+      "mean_risk_reduction_pct": 18.44,
+      "exposure_reduction_pct": 14.06,
+      "same_route": false
+    },
+    {
+      "origin_id": 3,
+      "origin": "Panamaram",
+      "destination_type": "Shelter",
+      "destination": "Crescent Public High School",
+      "shortest_km": 0.436,
+      "least_risk_km": 0.436,
+      "distance_increase_pct": 0.0,
+      "shortest_mean_risk": 0.3077,
+      "least_risk_mean_risk": 0.3077,
+      "shortest_max_risk": 0.3614,
+      "least_risk_max_risk": 0.3614,
+      "mean_risk_reduction_pct": 0.0,
+      "exposure_reduction_pct": 0.0,
+      "same_route": true
+    },
+    {
+      "origin_id": 4,
+      "origin": "Vellmunda",
+      "destination_type": "Hospital",
+      "destination": "District Hospital Mananthavady",
+      "shortest_km": 12.276,
+      "least_risk_km": 12.276,
+      "distance_increase_pct": 0.0,
+      "shortest_mean_risk": 0.2868,
+      "least_risk_mean_risk": 0.2868,
+      "shortest_max_risk": 0.5617,
+      "least_risk_max_risk": 0.5617,
+      "mean_risk_reduction_pct": 0.0,
+      "exposure_reduction_pct": 0.0,
+      "same_route": true
+    },
+    {
+      "origin_id": 4,
+      "origin": "Vellmunda",
+      "destination_type": "Shelter",
+      "destination": "St Annes English Medium Public School",
+      "shortest_km": 1.268,
+      "least_risk_km": 1.268,
+      "distance_increase_pct": 0.0,
+      "shortest_mean_risk": 0.3397,
+      "least_risk_mean_risk": 0.3397,
+      "shortest_max_risk": 0.359,
+      "least_risk_max_risk": 0.359,
+      "mean_risk_reduction_pct": 0.0,
+      "exposure_reduction_pct": 0.0,
+      "same_route": true
+    },
+    {
+      "origin_id": 5,
+      "origin": "Korome",
+      "destination_type": "Hospital",
+      "destination": "District Hospital Mananthavady",
+      "shortest_km": 17.245,
+      "least_risk_km": 17.245,
+      "distance_increase_pct": 0.0,
+      "shortest_mean_risk": 0.2919,
+      "least_risk_mean_risk": 0.2919,
+      "shortest_max_risk": 0.5617,
+      "least_risk_max_risk": 0.5617,
+      "mean_risk_reduction_pct": 0.0,
+      "exposure_reduction_pct": 0.0,
+      "same_route": true
+    },
+    {
+      "origin_id": 5,
+      "origin": "Korome",
+      "destination_type": "Shelter",
+      "destination": "M T D M Higher Secondary School Thondernadu",
+      "shortest_km": 1.428,
+      "least_risk_km": 1.428,
+      "distance_increase_pct": 0.0,
+      "shortest_mean_risk": 0.308,
+      "least_risk_mean_risk": 0.308,
+      "shortest_max_risk": 0.3439,
+      "least_risk_max_risk": 0.3439,
+      "mean_risk_reduction_pct": 0.0,
+      "exposure_reduction_pct": 0.0,
+      "same_route": true
+    }
+  ]
+}

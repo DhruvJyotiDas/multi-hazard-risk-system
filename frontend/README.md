@@ -30,3 +30,10 @@ python frontend/export_data.py
 Missing optional files are reported as unavailable. Malformed saved files fail explicitly during export. The frontend does not call Earth Engine or modify pipeline outputs.
 
 See [the project review and implementation plan](../docs/frontend-plan.md) for the proposed path to a geographic 3D application.
+
+## Previews and verification
+
+- [Desktop preview](../docs/frontend-desktop.png)
+- [Mobile preview](../docs/frontend-mobile.png)
+
+Checked in headless Chrome: saved-data rendering, layer switching, 2D/3D selection, opacity, origin selection, panel navigation, event inspection and mobile horizontal overflow. No JavaScript exceptions were observed. JavaScript syntax validation passed, and all eight existing offline Python tests passed using a workspace-local temporary directory. Full Earth Engine execution was not rerun.

@@ -1,0 +1,42 @@
+12:19:53 | INFO    | src.gee_init | Study area: OSM polygon: Wayanad district, Kerala, India (2143 km2)
+12:19:53 | INFO    | src.pipeline | --from-cache: rebuilding from outputs/ without Earth Engine
+12:20:04 | INFO    | src.routing | OSM network loaded from cache: 187194 nodes, 379258 edges
+12:20:04 | WARNING | rasterio._env | CPLE_AppDefined in DeprecationWarning: 'Memory' driver is deprecated since GDAL 3.11. Use 'MEM' onwards. Further messages of this type will be suppressed.
+12:20:04 | INFO    | src.hotspots | Hotspots: 351 polygons, 401.9 km2 (18.8% of study area), largest 130.84 km2, built-up land inside 53.55 km2
+12:20:04 | INFO    | pyogrio._io | Created 351 records
+12:20:04 | INFO    | src.hotspots | Hotspot polygons saved to C:\Users\dhruv\OneDrive\Desktop\GEO\multi-hazard-risk-system\outputs\hotspots.geojson
+12:20:43 | INFO    | src.routing | Risk sampled on 379258 edges (alpha=3.0); 9688 edges outside the raster used the raster mean (0.255)
+12:21:11 | INFO    | src.osm_pbf | PBF scan: 17622 drivable ways, 1924 POI features in the study-area bbox
+12:21:11 | INFO    | src.osm_pbf | Hospitals: 12 major facilities kept out of 168 (emergency=yes or taluk/district/general/...)
+12:21:11 | INFO    | src.osm_pbf | OSM POIs: 12 hospitals, 180 shelters, 245 named places
+12:21:11 | INFO    | pyogrio._io | Created 437 records
+12:21:11 | INFO    | src.routing | OSM POIs: 12 hospitals, 180 shelters, 245 named places
+12:21:11 | INFO    | src.routing | Settlement clusters: 46 candidates at built threshold 0.50; top 5 chosen by mean risk
+12:21:12 | INFO    | src.routing | Origins (highest-risk settlement clusters):
+ origin_id           name  pixels  mean_risk     lon     lat
+         1     Kallumukku      19     0.3769 76.3293 11.6620
+         2 Padinjarethara     118     0.3490 75.9665 11.6804
+         3      Panamaram      87     0.3421 76.0726 11.7348
+         4      Vellmunda      42     0.3322 75.9341 11.7377
+         5         Korome      32     0.3267 75.8826 11.7436
+12:21:13 | INFO    | src.routing | Route Kallumukku -> Hospital 'Government Taluk Hospital': shortest 9.28 km (mean risk 0.335) | least-risk 9.28 km (mean risk 0.335) => risk -0.0% for +0.0% distance
+12:21:13 | INFO    | src.routing | Route Kallumukku -> Shelter 'Govt Higher Secondary School Kalloor': shortest 0.40 km (mean risk 0.379) | least-risk 0.40 km (mean risk 0.379) => risk -0.0% for +0.0% distance
+12:21:14 | INFO    | src.routing | Route Padinjarethara -> Hospital 'K J Medical Trust Hospital': shortest 18.45 km (mean risk 0.274) | least-risk 18.45 km (mean risk 0.274) => risk -0.0% for +0.0% distance
+12:21:14 | INFO    | src.routing | Route Padinjarethara -> Shelter 'Panchayat Auditorium': shortest 1.34 km (mean risk 0.332) | least-risk 1.34 km (mean risk 0.332) => risk -0.0% for +0.0% distance
+12:21:15 | INFO    | src.routing | Route Panamaram -> Hospital 'District Hospital Mananthavady': shortest 14.11 km (mean risk 0.368) | least-risk 14.87 km (mean risk 0.300) => risk -18.4% for +5.4% distance
+12:21:15 | INFO    | src.routing | Route Panamaram -> Shelter 'Crescent Public High School': shortest 0.44 km (mean risk 0.308) | least-risk 0.44 km (mean risk 0.308) => risk -0.0% for +0.0% distance
+12:21:16 | INFO    | src.routing | Route Vellmunda -> Hospital 'District Hospital Mananthavady': shortest 12.28 km (mean risk 0.287) | least-risk 12.28 km (mean risk 0.287) => risk -0.0% for +0.0% distance
+12:21:16 | INFO    | src.routing | Route Vellmunda -> Shelter 'St Annes English Medium Public School': shortest 1.27 km (mean risk 0.340) | least-risk 1.27 km (mean risk 0.340) => risk -0.0% for +0.0% distance
+12:21:17 | INFO    | src.routing | Route Korome -> Hospital 'District Hospital Mananthavady': shortest 17.24 km (mean risk 0.292) | least-risk 17.24 km (mean risk 0.292) => risk -0.0% for +0.0% distance
+12:21:17 | INFO    | src.routing | Route Korome -> Shelter 'M T D M Higher Secondary School Thondernadu': shortest 1.43 km (mean risk 0.308) | least-risk 1.43 km (mean risk 0.308) => risk -0.0% for +0.0% distance
+12:21:17 | INFO    | pyogrio._io | Created 20 records
+12:21:17 | INFO    | src.routing | Routing done: 20 routes (10 pairs) saved to routes.geojson and route_metrics.csv
+12:21:29 | INFO    | src.webmap | Interactive web map written to C:\Users\dhruv\OneDrive\Desktop\GEO\multi-hazard-risk-system\index.html (25.7 MB)
+12:21:29 | INFO    | src.pipeline | ==============================================================================
+12:21:29 | INFO    | src.pipeline | ACCEPTANCE SUMMARY
+12:21:29 | INFO    | src.pipeline |   AHP CR = 0.0192 (< 0.10): OK
+12:21:29 | INFO    | src.pipeline |   risk_stats.csv: written
+12:21:29 | INFO    | src.pipeline |   least-risk routes vs shortest: 10 pairs (target >= 5): OK
+12:21:29 | INFO    | src.pipeline |   landslide validation gate (headline): PASS
+12:21:29 | INFO    | src.pipeline |   index.html: written
+12:21:29 | INFO    | src.pipeline | ==============================================================================

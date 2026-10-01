@@ -16,3 +16,52 @@
 12:13:07 | INFO    | src.hazard_fire | Fire layer: MODIS/VIIRS active fires 2015-12-31..2025-12-31, months 1-5, kernel radius 5000 m
 12:13:19 | INFO    | src.hazard_fire | Fire layer computed ({'modis_days': 1504, 'viirs_days': 1510})
 12:13:19 | INFO    | src.exposure | Exposure layer: Dynamic World built-area + distance to roads
+12:14:25 | INFO    | src.exposure | Exposure layer computed
+12:14:25 | INFO    | src.pipeline | Resume: landslide validation reloaded (headline PASS)
+12:14:25 | INFO    | src.mcdm | Resuming MCDM from checkpoint_mcdm.json (weights, breaks and statistics are not recomputed)
+12:15:43 | INFO    | src.rasters | Exporting 6 rasters at 100 m from Earth Engine (one request per band) ...
+12:15:43 | INFO    | src.rasters |   band 'flood' reused from flood.tif
+12:15:43 | INFO    | src.rasters |   band 'landslide' reused from landslide.tif
+12:15:43 | INFO    | src.rasters |   band 'exposure' reused from exposure.tif
+12:15:43 | INFO    | src.rasters |   band 'fire' reused from fire.tif
+12:16:30 | INFO    | src.rasters |   band 'built' downloaded (787 kB)
+12:16:32 | INFO    | src.rasters |   band 'inside' downloaded (6 kB)
+12:16:33 | INFO    | src.rasters | Rasters exported: grid 747x588 px, bounds W75.773 S11.451 E76.444 N11.979
+12:16:33 | WARNING | rasterio._env | CPLE_AppDefined in DeprecationWarning: 'Memory' driver is deprecated since GDAL 3.11. Use 'MEM' onwards. Further messages of this type will be suppressed.
+12:16:34 | INFO    | src.hotspots | Hotspots: 351 polygons, 401.9 km2 (18.8% of study area), largest 130.84 km2, built-up land inside 53.55 km2
+12:16:35 | INFO    | pyogrio._io | Created 351 records
+12:16:35 | INFO    | src.hotspots | Hotspot polygons saved to C:\Users\dhruv\OneDrive\Desktop\GEO\multi-hazard-risk-system\outputs\hotspots.geojson
+12:17:19 | INFO    | src.routing | Risk sampled on 379258 edges (alpha=3.0); 9688 edges outside the raster used the raster mean (0.255)
+12:17:45 | INFO    | src.osm_pbf | PBF scan: 17622 drivable ways, 1924 POI features in the study-area bbox
+12:17:45 | INFO    | src.osm_pbf | OSM POIs: 208 hospitals, 867 shelters, 245 named places
+12:17:45 | INFO    | pyogrio._io | Created 1,320 records
+12:17:45 | INFO    | src.routing | OSM POIs: 208 hospitals, 867 shelters, 245 named places
+12:17:45 | INFO    | src.routing | Settlement clusters: 46 candidates at built threshold 0.50; top 5 chosen by mean risk
+12:17:46 | INFO    | src.routing | Origins (highest-risk settlement clusters):
+ origin_id           name  pixels  mean_risk     lon     lat
+         1     Kallumukku      19     0.3769 76.3293 11.6620
+         2 Padinjarethara     118     0.3490 75.9665 11.6804
+         3      Panamaram      87     0.3421 76.0726 11.7348
+         4      Vellmunda      42     0.3322 75.9341 11.7377
+         5         Korome      32     0.3267 75.8826 11.7436
+12:17:47 | INFO    | src.routing | Route Kallumukku -> Hospital 'Family Health Centre Noolpuzha': shortest 0.11 km (mean risk 0.386) | least-risk 0.11 km (mean risk 0.386) => risk -0.0% for +0.0% distance
+12:17:47 | INFO    | src.routing | Route Kallumukku -> Shelter 'Sree Rama Vidya Nikethan': shortest 0.11 km (mean risk 0.386) | least-risk 0.11 km (mean risk 0.386) => risk -0.0% for +0.0% distance
+12:17:48 | INFO    | src.routing | Route Padinjarethara -> Hospital 'Santhi Hospital': shortest 1.40 km (mean risk 0.334) | least-risk 1.40 km (mean risk 0.334) => risk -0.0% for +0.0% distance
+12:17:48 | INFO    | src.routing | Route Padinjarethara -> Shelter 'Government Lower Primary School,Thengumunda': shortest 0.54 km (mean risk 0.339) | least-risk 0.54 km (mean risk 0.339) => risk -0.0% for +0.0% distance
+12:17:49 | INFO    | src.routing | Route Panamaram -> Hospital 'navodaya hospital': shortest 0.50 km (mean risk 0.320) | least-risk 0.50 km (mean risk 0.320) => risk -0.0% for +0.0% distance
+12:17:49 | INFO    | src.routing | Route Panamaram -> Shelter 'Shelter (unnamed)': shortest 0.39 km (mean risk 0.303) | least-risk 0.39 km (mean risk 0.303) => risk -0.0% for +0.0% distance
+12:17:49 | INFO    | src.routing | Route Vellmunda -> Hospital 'st sholastica hospital': shortest 4.73 km (mean risk 0.298) | least-risk 4.73 km (mean risk 0.298) => risk -0.0% for +0.0% distance
+12:17:49 | INFO    | src.routing | Route Vellmunda -> Shelter 'Shelter (unnamed)': shortest 0.66 km (mean risk 0.335) | least-risk 0.66 km (mean risk 0.335) => risk -0.0% for +0.0% distance
+12:17:50 | INFO    | src.routing | Route Korome -> Hospital 'Kripa Health Care': shortest 2.46 km (mean risk 0.318) | least-risk 2.46 km (mean risk 0.318) => risk -0.0% for +0.0% distance
+12:17:50 | INFO    | src.routing | Route Korome -> Shelter 'Government Lower Primary School Korome': shortest 0.72 km (mean risk 0.335) | least-risk 0.72 km (mean risk 0.335) => risk -0.0% for +0.0% distance
+12:17:50 | INFO    | pyogrio._io | Created 20 records
+12:17:50 | INFO    | src.routing | Routing done: 20 routes (10 pairs) saved to routes.geojson and route_metrics.csv
+12:18:07 | INFO    | src.webmap | Interactive web map written to C:\Users\dhruv\OneDrive\Desktop\GEO\multi-hazard-risk-system\index.html (26.8 MB)
+12:18:07 | INFO    | src.pipeline | ==============================================================================
+12:18:07 | INFO    | src.pipeline | ACCEPTANCE SUMMARY
+12:18:07 | INFO    | src.pipeline |   AHP CR = 0.0192 (< 0.10): OK
+12:18:07 | INFO    | src.pipeline |   risk_stats.csv: written
+12:18:07 | INFO    | src.pipeline |   least-risk routes vs shortest: 10 pairs (target >= 5): OK
+12:18:07 | INFO    | src.pipeline |   landslide validation gate (headline): PASS
+12:18:07 | INFO    | src.pipeline |   index.html: written
+12:18:07 | INFO    | src.pipeline | ==============================================================================

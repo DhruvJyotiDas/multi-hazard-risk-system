@@ -221,8 +221,18 @@ SETTLEMENT_MIN_PIXELS = 15               # minimum cluster size (at EXPORT_SCALE
 SETTLEMENT_MIN_SEPARATION_M = 3000       # origins must be this far apart
 PLACE_NAME_MAX_DIST_M = 4000
 HOSPITAL_TAGS = {"amenity": ["hospital"], "healthcare": ["hospital"]}
-HOSPITAL_NAME_EXCLUDE = r"dental|dentist|pharmac|laborator|diagnos|optical|physio|scan cent|medical store"
+HOSPITAL_NAME_EXCLUDE = r"dental|dentist|pharmac|laborator|diagnos|optical|physio|scan cent|medical store|ayurved|homoeo|homeo|unani|early intervention|primary health|veterinary"
+# Emergency destinations should be hospitals that can take casualties, not every health sub-centre:
+# a facility qualifies if it is tagged emergency=yes or its name matches HOSPITAL_MAJOR_REGEX. If fewer than
+# HOSPITAL_MIN_MAJOR qualify, all (name-filtered) hospitals are used instead.
+HOSPITAL_MAJOR_ONLY = True
+HOSPITAL_MAJOR_REGEX = r"taluk|district|general hospital|medical college|medical (centre|center|institute|trust)|institute of medical|government hospital|govt\.? hospital|referral|co-?operative hospital"
+HOSPITAL_MIN_MAJOR = 5
 HOSPITAL_FALLBACK_TAGS = {"amenity": ["clinic", "doctors"], "healthcare": ["clinic", "centre"]}
+# Shelters: community centres, assembly points, real shelters (bus/transport shelters are excluded) and large
+# schools (Kerala relief camps are mostly schools); small primary schools are excluded by SCHOOL_SHELTER_REGEX.
+SHELTER_EXCLUDE_TYPES = ("public_transport", "bus_stop", "picnic_shelter", "weather_shelter", "basic_hut", "lean_to")
+SCHOOL_SHELTER_REGEX = r"higher secondary|hss|ghss|high school|hs|ghs|college|public school|vidyalaya|residential"
 SHELTER_TAGS = {"amenity": ["shelter", "community_centre", "school"],
                 "emergency": ["assembly_point", "shelter"]}
 PLACE_TAGS = {"place": ["city", "town", "village", "hamlet", "suburb", "locality"]}

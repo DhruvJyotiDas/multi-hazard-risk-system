@@ -1,0 +1,11 @@
+origin_id,origin,destination_type,destination,shortest_km,least_risk_km,distance_increase_pct,shortest_mean_risk,least_risk_mean_risk,shortest_max_risk,least_risk_max_risk,mean_risk_reduction_pct,exposure_reduction_pct,same_route
+1,Kallumukku,Hospital,Government Taluk Hospital,9.281,9.281,0.0,0.3347,0.3347,0.3992,0.3992,0.0,0.0,True
+1,Kallumukku,Shelter,Govt Higher Secondary School Kalloor,0.404,0.404,0.0,0.3793,0.3793,0.3992,0.3992,0.0,0.0,True
+2,Padinjarethara,Hospital,K J Medical Trust Hospital,18.448,18.448,0.0,0.2744,0.2744,0.8644,0.8644,0.0,0.0,True
+2,Padinjarethara,Shelter,Panchayat Auditorium,1.335,1.335,0.0,0.3319,0.3319,0.3609,0.3609,0.0,0.0,True
+3,Panamaram,Hospital,District Hospital Mananthavady,14.113,14.871,5.37,0.3675,0.2998,1.0,1.0,18.44,14.06,False
+3,Panamaram,Shelter,Crescent Public High School,0.436,0.436,0.0,0.3077,0.3077,0.3614,0.3614,0.0,0.0,True
+4,Vellmunda,Hospital,District Hospital Mananthavady,12.276,12.276,0.0,0.2868,0.2868,0.5617,0.5617,0.0,0.0,True
+4,Vellmunda,Shelter,St Annes English Medium Public School,1.268,1.268,0.0,0.3397,0.3397,0.359,0.359,0.0,0.0,True
+5,Korome,Hospital,District Hospital Mananthavady,17.245,17.245,0.0,0.2919,0.2919,0.5617,0.5617,0.0,0.0,True
+5,Korome,Shelter,M T D M Higher Secondary School Thondernadu,1.428,1.428,0.0,0.308,0.308,0.3439,0.3439,0.0,0.0,True

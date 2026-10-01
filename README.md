@@ -31,6 +31,10 @@ landslide validation is free of label leakage (no landslide scars in the inputs)
 
 ## Quick start
 
+### 3D frontend design draft
+
+Open [`frontend/index.html`](frontend/index.html) in a browser for the interactive Wayanad Risk Observatory draft. It works offline and includes orbitable terrain, hazard controls, saved analysis summaries and illustrative route comparisons. Terrain and routes are explicitly demo data; the summary cards use saved project outputs. See [`frontend/README.md`](frontend/README.md) for controls and [`docs/frontend-plan.md`](docs/frontend-plan.md) for the project review and geographic integration plan.
+
 ```bash
 git clone <this repo> && cd multi-hazard-risk-system
 python -m venv .venv && source .venv/bin/activate          # Windows: .venv\Scripts\activate
