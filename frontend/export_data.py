@@ -93,7 +93,7 @@ def export():
         "texture": texture,
         "provenance": json.loads((assets/"provenance.json").read_text()) if (assets/"provenance.json").exists() else None,
         "snapshot": {"routes_modified":(OUTPUTS/"routes.geojson").stat().st_mtime,
-                     "note":"Current output files; run8.log records an earlier routing result."},
+                     "note":"Current output files from the latest completed pipeline run."},
         "availability": {
             "routes": (OUTPUTS / "routes.geojson").exists(),
             "summary": (OUTPUTS / "summary.json").exists(),

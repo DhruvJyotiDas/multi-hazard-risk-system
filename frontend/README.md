@@ -10,16 +10,18 @@ Visit `http://localhost:8080`. This draft does not replace the pipeline's genera
 
 ## What works
 
-- A shaded, triangulated 3D terrain scene rendered in Canvas, orbit by drag or arrow keys, zoom by wheel/buttons/plus/minus, camera reset, 2D plan view and vertical exaggeration.
-- Five selectable hazard/composite surfaces, opacity, wireframe, settlement markers and route visibility controls.
-- Click a terrain point to inspect an explicitly illustrative layer value; event inspection shows the saved validation result with its real coordinates.
-- Saved risk area statistics, combined AHP + entropy weights and event validation, loaded from a bundled local script.
-- Three example route comparisons with origin selection; Overview, Emergency routes and Model & data navigation changes the insight panel.
-- PNG export of the canvas terrain view, responsive desktop/mobile layouts and keyboard controls.
+- A shaded, triangulated 3D terrain scene rendered in Canvas, orbit by drag or arrow keys, zoom by wheel/buttons/plus/minus, shift-drag to pan, camera reset, 2D plan view and vertical exaggeration.
+- Five selectable layers (composite risk, flood, landslide, fire, exposure), opacity, wireframe, hotspot boundaries, settlement markers, route visibility and a Sentinel-2 satellite-imagery toggle.
+- Click a terrain point to inspect the **saved 100 m raster value** (index, class, elevation, coordinates); "Inspect event location" shows the saved July 2024 validation result at its real coordinates.
+- Saved risk-area statistics, combined AHP + entropy weights and event validation, loaded from a bundled local script.
+- Real route comparisons (10 origin–destination pairs) with origin and destination selection; Overview, Emergency routes and Model & data navigation changes the insight panel.
+- PNG export of the canvas terrain view, responsive desktop/mobile layouts and keyboard controls. On desktop and laptop screens the workspace is sized to the viewport so the 3D scene is visible without scrolling; the side panels scroll independently.
 
 ## Data boundary
 
-The terrain mesh, district-shaped footprint, river, scene markers, hazard surfaces, paths and route metrics are **illustrative design data**. No real DEM or georeferenced raster is being rendered. Scene inspection uses equal-width demo classes and does not apply the saved model's quantile thresholds. Example routes are not Dijkstra results and cannot guide travel. The cards, distribution, weights and event validation come from existing project outputs. The classified area total is the sum of `risk_stats.csv`, which differs slightly from the AOI's polygon area.
+The viewer renders **real, georeferenced data**: SRTM elevation (`USGS/SRTMGL1_003`, 100 m, `assets/elevation.tif`), a cloud-masked dry-season Sentinel-2 RGB composite (2023-11-01 to 2024-04-30, `assets/satellite.png`), the saved 100 m flood / landslide / fire / exposure / composite grids and class raster, the district boundary, hotspot polygons, OSM hospitals/shelters/places and the saved Dijkstra routes and metrics (`assets/provenance.json` records the sources).
+
+Display caveats: the 3D mesh is coarser than the data (about four raster cells per triangle), so each triangle is coloured from the **mean of the valid cells under it** (this removes aliasing speckle; click inspection still reads the exact 100 m value); relief is visually exaggerated; imagery is a historical composite; routes are saved model output, not live road conditions and cannot guide travel. The classified area total is the sum of `risk_stats.csv`, which differs slightly from the AOI polygon area.
 
 Refresh the saved snapshot after a pipeline run:
 
