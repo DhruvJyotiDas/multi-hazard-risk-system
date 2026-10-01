@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / "tests"))
 
 import config  # noqa: E402
 import synthetic  # noqa: E402
-from src import hotspots, mcdm, routing, webmap  # noqa: E402
+from src import hotspots, mcdm, routing, webdata, webmap  # noqa: E402
 from src.hazard_flood import otsu_threshold  # noqa: E402
 
 
@@ -95,6 +95,9 @@ def test_webmap_builds_standalone_html(tmp_path):
     routes, metrics = routing.compute_routes(g, clusters, hosp, shel)
     origins = gpd.GeoDataFrame(clusters, geometry=gpd.points_from_xy(clusters["lon"], clusters["lat"]), crs=4326)
     result = routing.RoutingResult(routes, metrics, origins, hosp, shel, routing.display_roads(g))
+    result.graph = g
+    facilities = [{"cat": "health", "sub": "hospital", "name": "Test Hospital", "lon": 76.05, "lat": 11.72},
+                  {"cat": "place", "sub": "town", "name": "Testville", "lon": 76.1, "lat": 11.7}]
     hs = hotspots.extract_hotspots(stack)
     summary = {
         "study_area_km2": 500.0, "breaks": stack.breaks,
@@ -105,6 +108,50 @@ def test_webmap_builds_standalone_html(tmp_path):
         "ahp": {"cr": 0.019, "lambda_max": 4.05}, "hotspots": hotspots.hotspot_summary(hs, 500.0),
         "validation": None}
     out = tmp_path / "index.html"
-    webmap.build_map(stack, summary, result, hs, out_path=out)
+    webmap.build_map(stack, summary, result, hs, out_path=out, facilities=facilities)
     html = out.read_text(encoding="utf-8")
     assert config.MAP_TITLE in html and "RASTER_DATA" in html and "Route comparison" in html
+    assert "FACILITY_DATA" in html and "WEBGRAPH" in html and 'id="fac-master"' in html and 'id="srch-from"' in html
+    assert "Test Hospital" in html
+
+
+def test_facilities_payload_indexes_categories():
+    facs = [{"cat": "health", "sub": "hospital", "name": "H", "lon": 76.0, "lat": 11.6},
+            {"cat": "place", "sub": "town", "name": "T", "lon": 76.1, "lat": 11.7},
+            {"cat": "unknown", "sub": "", "name": "X", "lon": 76.2, "lat": 11.8}]
+    payload = webdata.facilities_payload(facs)
+    keys = [c["key"] for c in payload["cats"]]
+    assert keys[-1] == "place" and "health" in keys
+    assert len(payload["pts"]) == 2                      # unknown categories are dropped
+    assert payload["cats"][keys.index("health")]["count"] == 1
+
+
+def test_webgraph_contracts_chains_and_preserves_length():
+    import base64
+    g = synthetic.make_graph(n=6)
+    stack = synthetic.make_stack()
+    routing.annotate_edges(g, stack)
+    # turn one row into a long degree-2 chain by deleting the cross links around it
+    wg = webdata.build_webgraph(g)
+    dec = lambda key, dt: np.frombuffer(base64.b64decode(wg[key]), dtype=dt)
+    assert wg["n"] <= len(g.nodes) and wg["e"] <= len(g.edges) // 2
+    assert len(dec("nodes", "<i4")) == 2 * wg["n"] and len(dec("goff", "<u4")) == wg["e"] + 1
+    lengths = dec("len", "<u4")
+    undirected_total = sum(d["length"] for _, _, d in g.edges(data=True)) / 2
+    assert lengths.sum() == pytest.approx(undirected_total, rel=0.01)   # contraction conserves road length
+    assert dec("risk", "u1").max() <= 254
+
+
+def test_webgraph_contraction_merges_a_pure_chain():
+    import networkx as nx
+    g = nx.MultiDiGraph(crs="EPSG:4326")
+    for i in range(5):
+        g.add_node(i, x=76.0 + i * 0.001, y=11.7)
+    for i in range(4):
+        for a, b in ((i, i + 1), (i + 1, i)):
+            g.add_edge(a, b, length=100.0, highway="residential", risk=0.5 if i < 2 else 0.1)
+    wg = webdata.build_webgraph(g)
+    assert (wg["n"], wg["e"]) == (2, 1)                  # 5 nodes in a line collapse into one segment
+    import base64
+    assert np.frombuffer(base64.b64decode(wg["len"]), dtype="<u4")[0] == 400
+    assert np.frombuffer(base64.b64decode(wg["risk"]), dtype="u1")[0] == round(0.3 * 254)  # length-weighted risk

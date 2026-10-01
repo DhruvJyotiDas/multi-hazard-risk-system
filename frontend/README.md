@@ -6,7 +6,7 @@ Open `index.html` directly in a browser. No build tools, API keys, CDN, network 
 python -m http.server 8080 --directory frontend
 ```
 
-Visit `http://localhost:8080`. This draft does not replace the pipeline's generated Folium `index.html`.
+Visit `http://localhost:8080` (the Detailed map tab needs the project root served instead; see below). This draft does not replace the pipeline's generated Folium `index.html`.
 
 ## What works
 
@@ -16,6 +16,20 @@ Visit `http://localhost:8080`. This draft does not replace the pipeline's genera
 - Saved risk-area statistics, combined AHP + entropy weights and event validation, loaded from a bundled local script.
 - Real route comparisons (10 origin–destination pairs) with origin and destination selection; Overview, Emergency routes and Model & data navigation changes the insight panel.
 - PNG export of the canvas terrain view, responsive desktop/mobile layouts and keyboard controls. On desktop and laptop screens the workspace is sized to the viewport so the 3D scene is visible without scrolling; the side panels scroll independently.
+
+## Detailed map tab (2D facilities, roads and route search)
+
+The **Detailed map** tab in the header embeds the pipeline's 2D map (`../index.html?embed=1`) in a themed frame, so both
+viewers live in one site:
+
+- a master switch for every OpenStreetMap facility (hospitals, police, shelters, schools, banks, fuel, worship, ...) and all roads, with per-category switches;
+- an **A to B search** that routes in the browser (shortest and least-risk) and lists every facility and place along the route;
+- click-anywhere risk class and index, plus all hazard layers.
+
+`?embed=1` hides the map's own header; the map has a "3D terrain view" link back here. Open the tab directly with
+`frontend/index.html#detailed-map`. The tab needs the project root to be served so `../index.html` is reachable
+(`python -m http.server 8000`, then <http://localhost:8000/frontend/>); when served with `--directory frontend` the tab
+shows instructions instead. Regenerate the map with `python -m src.webmap` (or `--from-cache`).
 
 ## Data boundary
 

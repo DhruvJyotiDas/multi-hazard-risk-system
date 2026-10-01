@@ -260,6 +260,7 @@
   function enabledCats() { return cats.map(function (c, i) { var cb = document.querySelector('.fac-cat[data-i="' + i + '"]'); return cb ? cb.checked : true; }); }
 
   function corridor(coords, bufferM) {
+    if (coords.length === 1) coords = [coords[0], coords[0]];     // A and B on the same spot: a disc around the point
     var n = coords.length, cum = [0], i;
     for (i = 1; i < n; i++) cum.push(cum[i - 1] + metersBetween(coords[i - 1][0], coords[i - 1][1], coords[i][0], coords[i][1]));
     var minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
@@ -287,7 +288,7 @@
     var counts = {}, html = '';
     cor.found.forEach(function (f) {
       var p = pts[f.i], c = cats[p[2]]; counts[c.key] = (counts[c.key] || 0) + 1;
-      var m = L.circleMarker([p[1], p[0]], {renderer: canvas, radius: 8, color: '#111', weight: 2, fillColor: c.color, fillOpacity: 1, bubblingMouseEvents: false});
+      var m = L.circleMarker([p[1], p[0]], {renderer: canvas, radius: 7, color: '#111', weight: 1.5, fillColor: c.color, fillOpacity: 1, bubblingMouseEvents: false});
       m.bindPopup(popupHtml(p) + '<small>' + fmtKm(f.along) + ' from A &middot; ' + Math.round(f.d) + ' m off the route</small>');
       m.bindTooltip(p[3] || c.label, {direction: 'top'}); resultGroup.addLayer(m); f.marker = m;
     });
@@ -312,7 +313,7 @@
   function go() {
     var msg = $('srch-msg'); msg.textContent = '';
     var A = resolve('from'), B = resolve('to');
-    if (!A || !B) { msg.textContent = 'Enter two locations: a place or facility name, or "lat, lon" (or use the pin buttons).'; return; }
+    if (!A || !B) { msg.textContent = 'Enter two locations: a place or facility name, or "lat, lon" (or use the pin buttons).'; $('srch-summary').style.display = 'none'; return; }
     routeGroup.clearLayers(); resultGroup.clearLayers();
     var bufferM = parseFloat($('srch-corr').value) * 1000, mode = $('srch-mode').value;
     var safe = null, shortest = null, note = '';
@@ -355,7 +356,8 @@
   }
   $('srch-go').addEventListener('click', go);
   $('srch-clear').addEventListener('click', function () {
-    routeGroup.clearLayers(); resultGroup.clearLayers(); chosen = {from: null, to: null};
+    routeGroup.clearLayers(); resultGroup.clearLayers(); chosen = {from: null, to: null}; last = null;
+    $('sug-from').style.display = 'none'; $('sug-to').style.display = 'none';
     $('srch-from').value = ''; $('srch-to').value = ''; $('srch-msg').textContent = ''; $('srch-summary').style.display = 'none';
     $('route-results').innerHTML = '<p class="note">Search two places to list what lies between them.</p>';
   });

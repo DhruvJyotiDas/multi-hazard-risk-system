@@ -10,7 +10,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="index.html" aria-label="Wayanad Risk Observatory home"><span class="brand-mark">◈</span><span>WAYANAD<span class="brand-sub">RISK OBSERVATORY</span></span></a>
-    <nav aria-label="Workspace"><button class="nav-button active" data-tab="overview">Overview</button><button class="nav-button" data-tab="routing">Emergency routes</button><button class="nav-button" data-tab="methods">Model & data</button></nav>
+    <nav aria-label="Workspace"><button class="nav-button active" data-tab="overview">Overview</button><button class="nav-button" data-tab="routing">Emergency routes</button><button class="nav-button" data-tab="methods">Model & data</button><button class="nav-button" data-tab="detail">Detailed map</button></nav>
     <div class="header-end"><span class="status-dot"></span><span>Analysis loaded</span><button id="export" class="button quiet">↓ Export view</button></div>
   </header>
   <main>
@@ -55,6 +55,18 @@
         <div id="methods-panel" hidden><div class="panel-title"><h2>Model & data</h2><span class="pill">MCDM</span></div><p class="muted">Saved combined AHP + entropy weights</p><div id="weights"></div><div class="divider"></div><h2>From satellite to decision</h2><ol class="method-list"><li><strong>Observe</strong><small>Sentinel-1/2, SRTM, CHIRPS, JRC, MODIS/VIIRS, Dynamic World</small></li><li><strong>Model</strong><small>Normalise hazard and exposure to 0–1; combine AHP and entropy weights</small></li><li><strong>Respond</strong><small>Extract hotspots and compare shortest vs least-risk OSM routes</small></li></ol><div class="validation-box"><span>DATA STATUS</span><p id="data-status"></p></div><p class="muted">Point values use the saved 100 m grid (display precision ±0.002). Composite classes use the original class raster. Mesh and imagery are reduced for display.</p></div>
         <div class="source-footer"><span class="status-dot"></span> Research decision-support prototype</div>
       </aside>
+    </section>
+    <section class="detail-view" id="detail-view" hidden aria-label="Detailed 2D map with facilities, roads and route search">
+      <div class="detail-bar">
+        <div><div class="eyebrow">DETAILED MAP · 2D</div><h2>Facilities, roads &amp; route search</h2><p class="muted">Every OpenStreetMap facility and road in the district. Search two places to see the shortest and least-risk road routes and everything that lies between them.</p></div>
+        <div class="detail-actions"><button id="detail-reload" class="button quiet" type="button">↻ Reload</button><a id="detail-open" class="button quiet" href="../index.html" target="_blank" rel="noopener">Open full page ↗</a><button id="detail-back" class="button" type="button">◈ Back to 3D</button></div>
+      </div>
+      <div class="detail-frame" id="detail-wrap">
+        <div class="detail-state" id="detail-loading"><span class="spinner" aria-hidden="true"></span><strong>Loading the detailed map…</strong><small>The map embeds rasters, roads and 2,500+ facilities (≈ 27 MB). The first load takes a few seconds.</small></div>
+        <div class="detail-state" id="detail-missing" hidden><strong>The detailed map was not found</strong><small>This page expects <code>../index.html</code>. Serve the project root so both viewers are reachable:<br><code>python -m http.server 8000</code> then open <code>http://localhost:8000/frontend/</code>.<br>If it does not exist yet, generate it with <code>python -m src.webmap</code>.</small></div>
+        <iframe id="detail-frame" title="Detailed Wayanad map: facilities, roads and route search" allow="fullscreen"></iframe>
+      </div>
+      <ul class="detail-hints" aria-label="What you can do here"><li><b>Master switch</b> turns every facility and road on or off</li><li><b>Categories</b> hospitals, police, shelters, schools, banks, fuel, worship…</li><li><b>A → B search</b> type two places, or pick them on the map</li><li><b>Click anywhere</b> for the risk class and index</li></ul>
     </section>
     <footer class="page-footer"><span>WAYANAD RISK OBSERVATORY <span class="muted">/ Satellite data → model → recommendation</span></span><span class="muted">Geographic viewer · Historical analysis</span></footer>
   </main>

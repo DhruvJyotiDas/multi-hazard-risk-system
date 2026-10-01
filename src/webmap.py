@@ -213,6 +213,9 @@ html,body{height:100%;margin:0;font-family:'Segoe UI',Roboto,Helvetica,Arial,san
 .pp{font-size:12.5px;line-height:1.45}.pp b{font-size:13px}
 .pp table{border-collapse:collapse;margin-top:4px}.pp td{padding:1px 8px 1px 0}
 small{color:#52606d}
+#hdr .to3d{margin-left:auto;color:#bce6a1;text-decoration:none;font-size:12.5px;border:1px solid #3d5a49;border-radius:6px;padding:6px 12px;white-space:nowrap}
+#hdr .to3d:hover{background:#17384f}
+.embed #hdr{display:none}.embed .folium-map{top:0 !important}.embed #panel{top:0}.embed #ptoggle{top:12px}.embed .srch{top:12px}
 .srch{position:fixed;top:64px;left:64px;width:350px;max-width:calc(100vw - 90px);background:#fff;z-index:1090;border-radius:8px;
  box-shadow:0 2px 12px rgba(0,0,0,.35);padding:9px 10px;font-size:12.5px}
 .srch-row{display:flex;gap:5px;align-items:center;margin-bottom:5px;position:relative}
@@ -245,7 +248,9 @@ JS = r"""
 (function(){
   var map = window[MAP_NAME];
   // place the map below the fixed header (inline styles written by folium would otherwise win)
-  var el = map.getContainer(); el.style.position='absolute'; el.style.top='54px'; el.style.left='0'; el.style.right='0';
+  // ?embed=1 (used by the 3D site's "Detailed map" tab) hides this page's own header
+  var EMBED = /[?&]embed=1/.test(location.search); if (EMBED) document.body.classList.add('embed');
+  var el = map.getContainer(); el.style.position='absolute'; el.style.top = EMBED ? '0' : '54px'; el.style.left='0'; el.style.right='0';
   el.style.bottom='0'; el.style.width='auto'; el.style.height='auto'; map.invalidateSize();
   var DATA = RASTER_DATA, ROWS = DATA.rows, COLS = DATA.cols, B = DATA.bounds;   // [west,south,east,north]
   function decode(b64){ var s = atob(b64), a = new Uint8Array(s.length); for (var i=0;i<s.length;i++) a[i]=s.charCodeAt(i); return a; }
@@ -344,8 +349,8 @@ def facilities_panel_html(payload: dict | None, has_roads: bool) -> str:
     roads = ("<label class='fcat'><input type='checkbox' id='fac-roads' checked>"
              "<span class='sw' style='background:#7a2e0e'></span>All roads (major / minor / local)</label>") if has_roads else             "<input type='checkbox' id='fac-roads' hidden>"
     return f"""<details open><summary>Facilities &amp; roads (details)</summary>
-  <label class="switch2"><input type="checkbox" id="fac-master"> Show all facilities, important places &amp; roads</label>
-  <div id="fac-body" class="off">{roads}<div class="fbtns"><button id="fac-all">All categories</button><button id="fac-none">None</button></div>{rows}</div>
+  <label class="switch2"><input type="checkbox" id="fac-master" checked> Show all facilities, important places &amp; roads</label>
+  <div id="fac-body">{roads}<div class="fbtns"><button id="fac-all">All categories</button><button id="fac-none">None</button></div>{rows}</div>
   <p class="note">Toggle the whole detail layer on or off. Click a marker for its name and category. Data: OpenStreetMap.</p></details>"""
 
 
@@ -441,11 +446,11 @@ def build_map(stack: RasterStack, summary: dict, routing: RoutingResult, hotspot
                             "opacity": style["opacity"], "fill": 0.0, "group": "Emergency routing", "swatch": style["color"]})
 
     # ---- markers ----------------------------------------------------------
-    def add_group(label: str, group_name: str, color: str, build) -> None:
+    def add_group(label: str, group_name: str, color: str, build, visible: bool = True) -> None:
         fg = folium.FeatureGroup(name=label, control=False)
         build(fg)
         fg.add_to(m)
-        layers_meta.append({"var": fg.get_name(), "label": label, "type": "markers", "visible": True,
+        layers_meta.append({"var": fg.get_name(), "label": label, "type": "markers", "visible": visible,
                             "opacity": None, "group": group_name, "swatch": color})
 
     def hospitals(fg):
@@ -472,7 +477,8 @@ def build_map(stack: RasterStack, summary: dict, routing: RoutingResult, hotspot
                           fill=False).add_to(fg)
 
     add_group("Hospitals", "Points of interest", "#d43f3a", hospitals)
-    add_group("Shelters / assembly points", "Points of interest", "#5cb85c", shelters)
+    # the detailed facilities layer already shows shelters, schools and community centres: hide the legacy pins by default
+    add_group("Shelters / assembly points", "Points of interest", "#5cb85c", shelters, visible=not facilities)
     add_group("Origins: highest-risk settlements", "Points of interest", "#f0ad4e", origins)
     add_group("July 2024 landslide event + 2 km zone", "Validation", "#000000", events)
 
@@ -504,7 +510,8 @@ def build_map(stack: RasterStack, summary: dict, routing: RoutingResult, hotspot
 
     panel = f"""
 <div id="hdr"><h1>{config.MAP_TITLE}</h1>
- <span class="sub">Satellite data &rarr; indicator / model &rarr; recommendation</span></div>
+ <span class="sub">Satellite data &rarr; indicator / model &rarr; recommendation</span>
+ <a class="to3d" href="frontend/index.html" title="Open the 3D terrain viewer">&#9672; 3D terrain view &nearr;</a></div>
 <button id="ptoggle" title="Show / hide panel">&#9654;</button>
 {search_box}
 <div id="panel">

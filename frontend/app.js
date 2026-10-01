@@ -199,7 +199,36 @@
   }
   $('origin').addEventListener('change',()=>{state.origin=Number($('origin').value);updateRoute();});$('destination').addEventListener('change',()=>{state.destination=$('destination').value;updateRoute();});
   $('focus-route').addEventListener('click',()=>{const coords=selectedRoutes().flatMap(f=>f.geometry.coordinates);if(!coords.length)return;const points=coords.map(toWorld),xs=points.map(p=>p.x),zs=points.map(p=>p.z),dx=Math.max(...xs)-Math.min(...xs),dz=Math.max(...zs)-Math.min(...zs);state.cx=(Math.max(...xs)+Math.min(...xs))/2;state.cz=(Math.max(...zs)+Math.min(...zs))/2;state.zoom=clamp(1.1/Math.max(dx,dz,.16),1.5,6);state.routes=true;$('routes').checked=true;setView(false);});
-  document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{const tab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(button=>{button.classList.toggle('active',button===b);button.setAttribute('aria-pressed',String(button===b));});for(const name of ['overview','routing','methods'])$(name+'-panel').hidden=name!==tab;if(tab==='routing'){state.routes=true;$('routes').checked=true;draw();}}));
+  // ---- Detailed map tab: embeds the pipeline's 2D map (facilities, roads, A -> B search) ---------------------
+  const detail={loaded:false};
+  async function openDetail(){
+    if(detail.loaded)return;detail.loaded=true;
+    const frame=$('detail-frame'),wrap=$('detail-wrap');
+    let reachable=true;
+    // file:// pages cannot fetch: in that case just try the frame
+    try{const r=await fetch('../index.html',{method:'HEAD'});reachable=r.ok;}catch(e){reachable=true;}
+    if(!reachable){$('detail-loading').hidden=true;$('detail-missing').hidden=false;detail.loaded=false;return;}
+    frame.addEventListener('load',()=>wrap.classList.add('ready'),{once:true});
+    frame.src='../index.html?embed=1';
+  }
+  function reloadDetail(){
+    $('detail-wrap').classList.remove('ready');$('detail-loading').hidden=false;$('detail-missing').hidden=true;
+    detail.loaded=false;$('detail-frame').removeAttribute('src');openDetail();
+  }
+  $('detail-reload').addEventListener('click',reloadDetail);
+  function showTab(tab){
+    const isDetail=tab==='detail';
+    document.querySelectorAll('[data-tab]').forEach(button=>{button.classList.toggle('active',button.dataset.tab===tab);button.setAttribute('aria-pressed',String(button.dataset.tab===tab));});
+    document.body.classList.toggle('detail-mode',isDetail);$('detail-view').hidden=!isDetail;
+    if(isDetail){openDetail();history.replaceState(null,'','#detailed-map');window.scrollTo({top:0,behavior:'smooth'});return;}
+    if(location.hash==='#detailed-map')history.replaceState(null,'',location.pathname+location.search);
+    for(const name of ['overview','routing','methods'])$(name+'-panel').hidden=name!==tab;
+    if(tab==='routing'){state.routes=true;$('routes').checked=true;}
+    draw();
+  }
+  document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+  $('detail-back').addEventListener('click',()=>showTab('overview'));
+  if(location.hash==='#detailed-map')showTab('detail');
   $('export').addEventListener('click',()=>{render();ctx.save();ctx.fillStyle='#102219e6';ctx.fillRect(0,height-34,width,34);ctx.fillStyle='#dae8cf';ctx.font='9px "Segoe UI",sans-serif';ctx.fillText(`Wayanad · ${layerNames[state.layer]} · SRTM / Sentinel-2 / © OSM · historical model`,12,height-13);ctx.restore();const anchor=document.createElement('a');anchor.download=`wayanad-${state.layer}-geographic.png`;anchor.href=canvas.toDataURL('image/png');anchor.click();draw();});
   $('ramp').style.background=`linear-gradient(90deg,${colors.join(',')})`;
   if(!data.raster.elevation){state.elevation=0;$('elevation').value=0;$('elevation-value').textContent='Unavailable';}
