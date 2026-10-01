@@ -724,7 +724,7 @@ HTML/CSS/JavaScript (Canvas, no build tools, no API keys). Open it at <http://lo
 server from [Run it on localhost](#run-it-on-localhost)) or run `python -m http.server 8080 --directory frontend` →
 <http://localhost:8080>. It works offline.
 
-It renders **real data from this pipeline**: SRTM elevation, a Sentinel-2 dry-season RGB composite, the saved 100 m
+It renders **real data from this pipeline** with a **WebGL terrain renderer** (≈ 110k-vertex hillshaded mesh, depth-buffered, with automatic Canvas fallback): SRTM elevation, a Sentinel-2 dry-season RGB composite, the saved 100 m
 risk/flood/landslide/fire/exposure grids, hotspot polygons, OSM hospitals/shelters/places, and the saved shortest vs
 least-risk routes with their metrics. Click any point for the saved raster value and elevation; switch layers, 3D/2D,
 vertical exaggeration, opacity, hotspots and satellite imagery; use the *Emergency routes* tab to compare routes per

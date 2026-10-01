@@ -36,17 +36,18 @@
         <label class="toggle-row">Terrain wireframe<input type="checkbox" id="wireframe"><span class="switch"></span></label>
         <label class="toggle-row">Hotspot boundaries<input type="checkbox" id="hotspots"><span class="switch"></span></label>
         <label class="toggle-row">Satellite imagery<input type="checkbox" id="satellite" checked><span class="switch"></span></label>
-        <div class="slider-row"><label for="elevation">Vertical exaggeration</label><output id="elevation-value">4.0×</output></div><input id="elevation" type="range" min="0" max="1000" value="400">
+        <label class="toggle-row">Hillshading<input type="checkbox" id="shade" checked><span class="switch"></span></label>
+        <div class="slider-row"><label for="elevation">Vertical exaggeration</label><output id="elevation-value">2.4×</output></div><input id="elevation" type="range" min="0" max="1000" value="240">
         <div class="layer-note"><span>ⓘ</span><p id="terrain-note">Real analysis grids and OSM routes. Elevation is visually exaggerated; imagery is a historical composite.</p></div>
       </aside>
-      <div class="scene" id="scene"><canvas id="terrain" tabindex="0" aria-label="Geographic Wayanad terrain. Drag or use arrow keys to rotate, scroll or use plus and minus to zoom. Click to inspect a raster pixel."></canvas>
+      <div class="scene" id="scene"><canvas id="terrain-bg" aria-hidden="true"></canvas><canvas id="terrain-gl" aria-hidden="true"></canvas><canvas id="terrain" tabindex="0" aria-label="Geographic Wayanad terrain. Drag or use arrow keys to rotate, scroll or use plus and minus to zoom. Click to inspect a raster pixel."></canvas>
         <div class="scene-header"><span class="scene-tag"><span class="status-dot"></span> TERRAIN EXPLORER</span><div class="view-switch"><button id="view3d" class="selected">3D</button><button id="view2d">2D</button></div></div>
         <div class="scene-caption"><h2>Wayanad, in perspective.</h2><p id="scene-layer">Composite multi-hazard risk</p></div>
         <div class="map-controls"><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button><button id="reset" aria-label="Reset camera">⌖</button></div>
         <div class="compass"><span>N</span><div id="compass-arrow">↑</div></div>
         <div id="inspect" class="inspect" hidden aria-live="polite"><button id="close-inspect" aria-label="Close inspection">×</button><div class="eyebrow" id="inspect-source">SAVED RASTER SAMPLE</div><strong id="inspect-class"></strong><p id="inspect-value"></p><small id="inspect-coords"></small></div>
         <div class="map-bottom"><div class="legend"><span id="legend-title">COMPOSITE RISK</span><div class="ramp" id="ramp"></div><div class="legend-labels"><span>Very low</span><span>Very high</span></div></div><span class="interaction-hint">Drag to orbit · scroll to zoom · click to inspect</span></div>
-        <div class="scene-footer"><span id="map-attribution">SRTM · SENTINEL-2 · © OPENSTREETMAP CONTRIBUTORS</span><span id="scene-state">3D / 4.0× ELEVATION</span></div>
+        <div class="scene-footer"><span id="map-attribution">SRTM · SENTINEL-2 · © OPENSTREETMAP CONTRIBUTORS</span><span id="scene-state">3D / 2.4× ELEVATION</span></div>
       </div>
       <aside class="insights-panel">
         <div id="overview-panel"><div class="panel-title"><h2>Risk distribution</h2><span class="pill">Saved run</span></div><p class="muted">Five classes. One regional picture.</p><div id="distribution"></div><div class="insight-callout"><span>↗</span><p><strong id="risk-callout">Loading analysis…</strong><small>High and very high classes combined</small></p></div>
@@ -70,6 +71,6 @@
     </section>
     <footer class="page-footer"><span>WAYANAD RISK OBSERVATORY <span class="muted">/ Satellite data → model → recommendation</span></span><span class="muted">Geographic viewer · Historical analysis</span></footer>
   </main>
-  <script src="data.js"></script><script src="app.js"></script>
+  <script src="data.js"></script><script src="terrain-gl.js"></script><script src="app.js"></script>
 </body>
 </html>

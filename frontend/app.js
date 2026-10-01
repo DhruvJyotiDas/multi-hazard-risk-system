@@ -7,7 +7,7 @@
   const names=['Very Low','Low','Moderate','High','Very High'];
   const layerNames={risk:'Composite multi-hazard risk',flood:'Flood susceptibility',landslide:'Landslide susceptibility',fire:'Fire susceptibility',exposure:'Settlement exposure'};
   const palettes={risk:colors,flood:['#d2e8dc','#a3d4d3','#74b8ce','#438bc2','#21517e'],landslide:['#d1dd9b','#bac077','#e0ad60','#bf733d','#7d382c'],fire:['#e2dc95','#e6c567','#eaa14f','#d85a37','#922c2b'],exposure:['#d7d3e4','#bcb7d5','#9b8cbd','#78579b','#533477']};
-  const state={layer:'risk',opacity:.45,elevation:4,yaw:-.18,pitch:.8,zoom:1,flat:false,markers:true,routes:true,wireframe:false,hotspots:false,satellite:true,origin:3,destination:'Hospital',cx:0,cz:0};
+  const state={layer:'risk',opacity:.5,elevation:2.4,yaw:-.18,pitch:.95,zoom:1,flat:false,markers:true,routes:true,wireframe:false,hotspots:false,satellite:true,shade:true,origin:3,destination:'Hospital',cx:0,cz:0};
   const clamp=(v,lo=0,hi=1)=>Math.max(lo,Math.min(hi,v));
   const fmt=n=>Number(n).toLocaleString('en-IN',{maximumFractionDigits:0});
   const total=data.stats.reduce((s,r)=>s+Number(r.area_km2),0),high=data.stats.filter(r=>Number(r.class_id)>=4).reduce((s,r)=>s+Number(r.area_km2),0);
@@ -55,17 +55,26 @@
   function inRing(x,z,ring){let hit=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[i],b=ring[j];if(((a.z>z)!==(b.z>z))&&x<(b.x-a.x)*(z-a.z)/(b.z-a.z)+a.x)hit=!hit;}return hit;}
   // Exact polygon membership prevents the mesh's border from becoming an oval or rectangular footprint.
   function inside(x,z){return index(x,z)>=0&&classes[index(x,z)]>0;}
+  // WebGL terrain: high-resolution hillshaded mesh with satellite + hazard textures and a depth buffer.
+  // The Canvas 2D triangle mesh below is kept only as a fallback when WebGL is unavailable.
+  let gl=null;const glCanvas=$('terrain-gl'),bgCanvas=$('terrain-bg');
+  if(window.TerrainGL&&elevation&&glCanvas&&bgCanvas&&!/[?&]renderer=canvas/.test(location.search)){try{gl=new TerrainGL(glCanvas);}catch(err){console.warn('WebGL terrain unavailable; using the Canvas fallback:',err.message);}}
+  if(!gl){if(glCanvas)glCanvas.hidden=true;if(bgCanvas)bgCanvas.hidden=true;}
   const vertices=[],faces=[],nx=97,nz=Math.max(40,Math.round(nx*aspect));
+  if(!gl){
   for(let j=0;j<nz;j++)for(let i=0;i<nx;i++){const x=i/(nx-1)*2-1,z=(j/(nz-1)*2-1)*aspect;vertices.push({x,z,h:terrain(x,z),u:i/(nx-1),v:j/(nz-1)});}
   for(let j=0;j<nz-1;j++)for(let i=0;i<nx-1;i++){
     const a=j*nx+i,b=a+1,c=a+nx,d=c+1;
     for(const ids of [[a,c,b],[b,c,d]]){const x=ids.reduce((s,k)=>s+vertices[k].x,0)/3,z=ids.reduce((s,k)=>s+vertices[k].z,0)/3;
       if(inside(x,z)){const h=terrain(x,z),dx=(terrain(x+.008,z)-terrain(x-.008,z))/.016,dz=(terrain(x,z+.008)-terrain(x,z-.008))/.016;faces.push({ids,x,z,h,light:clamp(.9-dx*2+dz*1.2,.6,1.15)});}}
   }
+  }
   const canvas=$('terrain'),ctx=canvas.getContext('2d');if(!ctx){$('scene-layer').textContent='Canvas is unavailable.';return;}
+  const bgctx=gl?bgCanvas.getContext('2d'):ctx;
   let width=1,height=1,pending=false,projected=[],triangles=[],textureReady=false;
-  const texture=new Image();texture.onload=()=>{textureReady=true;draw();};if(data.texture)texture.src=data.texture;
-  const baseScale=()=>Math.min(width*.44,height*.46/aspect);
+  const texture=new Image();texture.onload=()=>{textureReady=true;if(gl)gl.setSatellite(texture);draw();};if(data.texture)texture.src=data.texture;
+  if(gl)gl.setTerrain({elevation:new Int16Array(elevationBytes.buffer,elevationBytes.byteOffset,elevationBytes.length>>1),cols:raster.cols,rows:raster.rows,widthM:raster.width_m,aspect,classes});
+  const baseScale=()=>Math.min(width*.425,height*.60/aspect);
   function project(x,z,h=terrain(x,z)){
     x-=state.cx;z-=state.cz;
     const cy=Math.cos(state.yaw),sy=Math.sin(state.yaw),rx=x*cy-z*sy,rz=x*sy+z*cy;
@@ -89,6 +98,34 @@
     const n=value*4,k=Math.min(3,Math.floor(n)),t=n-k,a=rgb(palettes[state.layer][k]),b=rgb(palettes[state.layer][k+1]);return `rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*t)).join(',')})`;
   }
   let faceColors=faces.map(faceColor);
+  // Hazard / risk layer as an RGBA texture (smoothly filtered on the GPU, shaded by the terrain lighting).
+  function overlayRGBA(layer){
+    const n=raster.cols*raster.rows,out=new Uint8Array(n*4),pal=palettes[layer].map(rgb),cls=colors.map(rgb),g=grids[layer],fill=pal[0];
+    for(let i=0;i<n;i++){
+      const valid=classes[i]>0&&g[i]!==255;let c=fill;
+      if(valid){
+        if(layer==='risk')c=cls[Math.max(0,classes[i]-1)];
+        else{const v=g[i]/254*4,k=Math.min(3,Math.floor(v)),t=v-k,a=pal[k],b=pal[k+1];c=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+      }
+      out[i*4]=c[0];out[i*4+1]=c[1];out[i*4+2]=c[2];out[i*4+3]=valid?255:0;
+    }
+    return out;
+  }
+  const refreshOverlay=()=>{if(gl)gl.setOverlay(overlayRGBA(state.layer));};
+  refreshOverlay();
+  // Ray-march the exaggerated DEM along the view ray to find the terrain point under a screen position.
+  function pick(sx,sy){
+    const scale=baseScale()*state.zoom,cy=Math.cos(state.yaw),sn=Math.sin(state.yaw),p=state.flat?0:state.pitch,cp=Math.cos(p),sp=Math.sin(p);
+    const rx=(sx-width*.47)/scale,target=(sy-height*.57)/scale;
+    const at=rz=>{const x=rx*cy+rz*sn+state.cx,z=-rx*sn+rz*cy+state.cz;return {x,z,f:rz*cp-(state.flat?0:terrain(x,z)*state.elevation)*sp-target};};
+    let prev=at(3.2),rzPrev=3.2;
+    for(let rz=3.2-.004;rz>=-3.2;rz-=.004){
+      const cur=at(rz);
+      if(prev.f>0&&cur.f<=0){let lo=rz,hi=rzPrev;for(let k=0;k<14;k++){const mid=(lo+hi)/2;if(at(mid).f>0)hi=mid;else lo=mid;}const hit=at((lo+hi)/2);if(inside(hit.x,hit.z))return hit;}
+      prev=cur;rzPrev=rz;
+    }
+    return null;
+  }
   function outline(points,color,lineWidth,dashed=false,closed=false,heightOffset=.0006){
     ctx.beginPath();points.forEach((p,i)=>{const screen=project(p.x,p.z,terrain(p.x,p.z)+heightOffset);i?ctx.lineTo(screen.x,screen.y):ctx.moveTo(screen.x,screen.y);});if(closed)ctx.closePath();ctx.strokeStyle=color;ctx.lineWidth=lineWidth;ctx.lineJoin='round';ctx.lineCap='round';ctx.setLineDash(dashed?[5,4]:[]);ctx.stroke();ctx.setLineDash([]);
   }
@@ -125,13 +162,10 @@
     const x=coefficient(p.x,q.x,r.x),y=coefficient(p.y,q.y,r.y);
     ctx.save();ctx.clip();ctx.transform(x[0],y[0],x[1],y[1],x[2],y[2]);ctx.drawImage(texture,0,0);ctx.restore();
   }
-  function render(){
-    pending=false;ctx.clearRect(0,0,width,height);
-    ctx.fillStyle='#15261f';ctx.fillRect(0,0,width,height);
-    ctx.lineWidth=.5;ctx.strokeStyle='#b8cf9c10';
-    for(let i=-1.4;i<=1.4;i+=.2){for(const points of [[{x:i,z:-1.2},{x:i,z:1.2}],[{x:-1.4,z:i},{x:1.4,z:i}]]){ctx.beginPath();points.forEach((p,k)=>{const s=project(p.x,p.z,0);k?ctx.lineTo(s.x,s.y):ctx.moveTo(s.x,s.y);});ctx.stroke();}}
-    // A vertical edge under the true district boundary makes the DEM relief legible.
-    if(!state.flat){for(const ring of boundary){for(let i=1;i<ring.length;i++){const a=ring[i-1],b=ring[i],p=project(a.x,a.z),q=project(b.x,b.z),r=project(b.x,b.z,0),s=project(a.x,a.z,0);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.lineTo(r.x,r.y);ctx.lineTo(s.x,s.y);ctx.closePath();ctx.fillStyle='#1a3226';ctx.fill();}}}
+  function renderTerrainGL(){
+    gl.draw({width,height,yaw:state.yaw,pitch:state.pitch,scale:baseScale()*state.zoom,elev:state.elevation,flat:state.flat,cx:state.cx,cz:state.cz,opacity:state.opacity,satellite:state.satellite,wire:state.wireframe,shade:state.shade?1:0});
+  }
+  function renderTerrainCanvas(){
     projected=vertices.map(v=>project(v.x,v.z,v.h));
     triangles=faces.map((f,i)=>({f,i,depth:f.ids.reduce((sum,k)=>sum+projected[k].depth,0)/3})).sort((a,b)=>a.depth-b.depth);
     for(const {f,i} of triangles){
@@ -142,6 +176,15 @@
       const shade=state.flat?0:1-f.light;if(shade>0){ctx.globalAlpha=shade;ctx.fillStyle='#031810';ctx.fill();ctx.globalAlpha=1;}
       if(state.wireframe){ctx.strokeStyle='#dbe9c533';ctx.lineWidth=.4;ctx.stroke();}
     }
+  }
+  function render(){
+    pending=false;ctx.clearRect(0,0,width,height);
+    if(gl)bgctx.clearRect(0,0,width,height);else{ctx.fillStyle='#15261f';ctx.fillRect(0,0,width,height);}
+    bgctx.lineWidth=.5;bgctx.strokeStyle='#b8cf9c10';
+    for(let i=-1.4;i<=1.4;i+=.2){for(const points of [[{x:i,z:-1.2},{x:i,z:1.2}],[{x:-1.4,z:i},{x:1.4,z:i}]]){bgctx.beginPath();points.forEach((p,k)=>{const s=project(p.x,p.z,0);k?bgctx.lineTo(s.x,s.y):bgctx.moveTo(s.x,s.y);});bgctx.stroke();}}
+    // A vertical wall under the true district boundary makes the relief legible (drawn beneath the terrain).
+    if(!state.flat){for(const ring of boundary){for(let i=1;i<ring.length;i++){const a=ring[i-1],b=ring[i],p=project(a.x,a.z),q=project(b.x,b.z),r=project(b.x,b.z,0),s=project(a.x,a.z,0);bgctx.beginPath();bgctx.moveTo(p.x,p.y);bgctx.lineTo(q.x,q.y);bgctx.lineTo(r.x,r.y);bgctx.lineTo(s.x,s.y);bgctx.closePath();bgctx.fillStyle='#1a3226';bgctx.fill();}}}
+    if(gl)renderTerrainGL();else renderTerrainCanvas();
     boundary.forEach(r=>outline(r,'#c7dbacb0',1,false,true));
     if(state.hotspots)for(const feature of data.hotspots?.features||[])for(const ring of rings(feature.geometry))outline(ring.map(toWorld),'#ffa577b0',.85,false,true);
     if(state.routes){const selected=selectedRoutes();for(const type of ['shortest','least_risk']){const route=selected.find(f=>f.properties.route_type===type);if(!route)continue;const points=route.geometry.coordinates.map(toWorld);outline(points,'#0d211bcc',type==='shortest'?5.5:4.5);outline(points,type==='shortest'?'#f5ddc6':'#c9ff8f',type==='shortest'?3.5:2.5,type==='shortest');}}
@@ -153,17 +196,17 @@
     ctx.font='8px "Segoe UI", sans-serif';ctx.fillStyle='#c5d7bb';ctx.fillText('WGS84 · saved 100 m analysis',16,height-155);
   }
   function draw(){if(!pending){pending=true;requestAnimationFrame(render);}}
-  function resize(){const bounds=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);width=bounds.width;height=bounds.height;canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);draw();}
+  function resize(){const bounds=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);width=bounds.width;height=bounds.height;canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);if(gl){bgCanvas.width=canvas.width;bgCanvas.height=canvas.height;bgctx.setTransform(dpr,0,0,dpr,0,0);gl.resize(width,height,dpr);}draw();}
   new ResizeObserver(resize).observe($('scene'));
-  function selectLayer(layer){state.layer=layer;document.querySelectorAll('[data-layer]').forEach(b=>{b.classList.toggle('active',b.dataset.layer===layer);b.setAttribute('aria-pressed',String(b.dataset.layer===layer));});$('scene-layer').textContent=layerNames[layer];$('legend-title').textContent=layer==='risk'?'COMPOSITE RISK CLASSES':layer.toUpperCase()+' · INDEX 0–1';$('ramp').style.background=`linear-gradient(90deg,${palettes[layer].join(',')})`;document.querySelector('.legend-labels').firstElementChild.textContent=layer==='risk'?'Very low':'0';document.querySelector('.legend-labels').lastElementChild.textContent=layer==='risk'?'Very high':'1';faceColors=faces.map(faceColor);$('inspect').hidden=true;draw();}
+  function selectLayer(layer){state.layer=layer;document.querySelectorAll('[data-layer]').forEach(b=>{b.classList.toggle('active',b.dataset.layer===layer);b.setAttribute('aria-pressed',String(b.dataset.layer===layer));});$('scene-layer').textContent=layerNames[layer];$('legend-title').textContent=layer==='risk'?'COMPOSITE RISK CLASSES':layer.toUpperCase()+' · INDEX 0–1';$('ramp').style.background=`linear-gradient(90deg,${palettes[layer].join(',')})`;document.querySelector('.legend-labels').firstElementChild.textContent=layer==='risk'?'Very low':'0';document.querySelector('.legend-labels').lastElementChild.textContent=layer==='risk'?'Very high':'1';faceColors=faces.map(faceColor);refreshOverlay();$('inspect').hidden=true;draw();}
   document.querySelectorAll('[data-layer]').forEach(b=>b.addEventListener('click',()=>selectLayer(b.dataset.layer)));
   for(const key of ['opacity','elevation'])$(key).addEventListener('input',()=>{state[key]=Number($(key).value)/100;$(key+'-value').textContent=key==='opacity'?`${Math.round(state[key]*100)}%`:`${state[key].toFixed(1)}×`;draw();});
-  for(const key of ['markers','routes','wireframe','hotspots','satellite'])$(key).addEventListener('change',()=>{state[key]=$(key).checked;draw();});
+  for(const key of ['markers','routes','wireframe','hotspots','satellite','shade'])$(key).addEventListener('change',()=>{state[key]=$(key).checked;draw();});
   function setView(flat){state.flat=flat;$('view2d').classList.toggle('selected',flat);$('view3d').classList.toggle('selected',!flat);$('inspect').hidden=true;draw();}
   $('view2d').addEventListener('click',()=>setView(true));$('view3d').addEventListener('click',()=>setView(false));
   function zoom(delta){state.zoom=clamp(state.zoom+delta,.6,8);$('inspect').hidden=true;draw();}
   $('zoom-in').addEventListener('click',()=>zoom(.2));$('zoom-out').addEventListener('click',()=>zoom(-.2));
-  $('reset').addEventListener('click',()=>{state.yaw=-.18;state.pitch=.8;state.zoom=1;state.cx=0;state.cz=0;setView(false);});
+  $('reset').addEventListener('click',()=>{state.yaw=-.18;state.pitch=.95;state.zoom=1;state.cx=0;state.cz=0;setView(false);});
   canvas.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?-.12:.12);},{passive:false});
   function inspectGeo(x,z){
     const i=index(x,z),value=sample(state.layer,x,z);if(value===null||!classes[i]){$('inspect').hidden=true;return;}
@@ -175,7 +218,7 @@
   }
   function inspectPoint(x,y){
     const marker=markerPositions.find(m=>Math.hypot(m.screen.x-x,m.screen.y-y)<9);if(marker){inspectGeo(marker.x,marker.z);return;}
-    for(let i=triangles.length-1;i>=0;i--){const f=triangles[i].f,[a,b,c]=f.ids.map(k=>projected[k]),den=(b.y-c.y)*(a.x-c.x)+(c.x-b.x)*(a.y-c.y);if(Math.abs(den)<.001)continue;const u=((b.y-c.y)*(x-c.x)+(c.x-b.x)*(y-c.y))/den,v=((c.y-a.y)*(x-c.x)+(a.x-c.x)*(y-c.y))/den;if(u>=0&&v>=0&&u+v<=1){const [va,vb,vc]=f.ids.map(k=>vertices[k]);inspectGeo(va.x*u+vb.x*v+vc.x*(1-u-v),va.z*u+vb.z*v+vc.z*(1-u-v));return;}}
+    const hit=pick(x,y);if(hit){inspectGeo(hit.x,hit.z);return;}
     $('inspect').hidden=true;
   }
   let drag=null;
@@ -229,7 +272,11 @@
   document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
   $('detail-back').addEventListener('click',()=>showTab('overview'));
   if(location.hash==='#detailed-map')showTab('detail');
-  $('export').addEventListener('click',()=>{render();ctx.save();ctx.fillStyle='#102219e6';ctx.fillRect(0,height-34,width,34);ctx.fillStyle='#dae8cf';ctx.font='9px "Segoe UI",sans-serif';ctx.fillText(`Wayanad · ${layerNames[state.layer]} · SRTM / Sentinel-2 / © OSM · historical model`,12,height-13);ctx.restore();const anchor=document.createElement('a');anchor.download=`wayanad-${state.layer}-geographic.png`;anchor.href=canvas.toDataURL('image/png');anchor.click();draw();});
+  function composite(){
+    const out=document.createElement('canvas');out.width=canvas.width;out.height=canvas.height;const o=out.getContext('2d');
+    o.fillStyle='#15261f';o.fillRect(0,0,out.width,out.height);if(gl){o.drawImage(bgCanvas,0,0);o.drawImage(glCanvas,0,0);}o.drawImage(canvas,0,0);return out;
+  }
+  $('export').addEventListener('click',()=>{render();ctx.save();ctx.fillStyle='#102219e6';ctx.fillRect(0,height-34,width,34);ctx.fillStyle='#dae8cf';ctx.font='9px "Segoe UI",sans-serif';ctx.fillText(`Wayanad · ${layerNames[state.layer]} · SRTM / Sentinel-2 / © OSM · historical model`,12,height-13);ctx.restore();const anchor=document.createElement('a');anchor.download=`wayanad-${state.layer}-geographic.png`;anchor.href=composite().toDataURL('image/png');anchor.click();draw();});
   $('ramp').style.background=`linear-gradient(90deg,${colors.join(',')})`;
   if(!data.raster.elevation){state.elevation=0;$('elevation').value=0;$('elevation-value').textContent='Unavailable';}
   if(!data.texture){state.satellite=false;$('satellite').checked=false;$('satellite').disabled=true;}

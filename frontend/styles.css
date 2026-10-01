@@ -46,3 +46,8 @@ body.detail-mode .page-heading,body.detail-mode .metrics,body.detail-mode .works
 .detail-hints b{display:block;color:var(--mint);font-weight:500;font-size:10.5px;margin-bottom:2px}
 @media (max-width:1000px){.detail-bar{flex-direction:column;align-items:flex-start}.detail-actions{justify-content:flex-start}.detail-hints{grid-template-columns:repeat(2,1fr)}.detail-frame{height:max(480px,calc(100vh - 330px))}}
 @media (max-width:600px){.detail-hints{grid-template-columns:1fr}.detail-actions .button{flex:1;justify-content:center}}
+
+/* ---- WebGL terrain stack: background (grid + skirt) -> GL terrain -> overlay (routes, labels, markers) ---- */
+#terrain-bg,#terrain-gl{pointer-events:none;cursor:default}
+#terrain-gl[hidden],#terrain-bg[hidden]{display:none}
+#terrain{background:transparent}
